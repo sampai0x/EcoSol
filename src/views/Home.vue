@@ -1,7 +1,11 @@
 <template>
   <body>
     <section class="landing">
-      <img src="/public/img/EcoSol.png" alt="logo" class="solar-image">
+      <img src="/src/img/EcoSol.png" alt="logo" class="solar-image">
+      <h1>Sobre o Projeto</h1>
+      <p>
+        
+      </p>
       <h1>Compartilhe Energia Solar</h1>
       <p>
         Conecte-se com outras pessoas para fornecer ou receber energia solar de forma simples e colaborativa.
@@ -12,7 +16,7 @@
         <button @click="irPara('cliente')">Sou Cliente</button>
       </div>
 
-    </section>git branch
+    </section>
   </body>
 </template>
   
