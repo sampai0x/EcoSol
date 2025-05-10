@@ -13,6 +13,11 @@
       </div>
 
       <div class="form-group">
+        <label for="senha">Senha:</label>
+        <input type="password" id="senha" v-model="form.senha" required />
+      </div>
+
+      <div class="form-group">
         <label for="endereco">Endereço:</label>
         <input type="text" id="endereco" v-model="form.endereco" required />
       </div>
@@ -31,6 +36,7 @@ export default {
       form: {
         nome: '',
         email: '',
+        senha: '',
         endereco: ''
       }
     };
@@ -93,5 +99,16 @@ button {
 
 button:hover {
   background-color: #d97706;
+}
+
+@media (max-width: 480px) {
+  form {
+    padding: 1.2rem;
+    width: 90%;
+  }
+
+  input, button {
+    font-size: 0.95rem;
+  }
 }
 </style>
