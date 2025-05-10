@@ -58,6 +58,22 @@
         </div>
       </div>
 
+      <!-- carrosel de imagens -->
+      <div class="carrossel-container">
+        <div class="carrossel-texto">
+          <h2>Energia que Conecta</h2>
+          <p>
+            Compartilhar energia solar nunca foi tão fácil. Veja como a nossa plataforma transforma a luz do sol em
+            conexão entre pessoas.
+          </p>
+        </div>
+        <div class="carrossel">
+          <transition name="fade-slide" mode="out-in">
+            <img :key="imagemAtual" :src="imagens[imagemAtual]" alt="Imagem do carrossel" class="carrossel-img" />
+          </transition>
+        </div>
+      </div>
+
     </section>
   </body>
 </template>
@@ -71,7 +87,16 @@ export default {
       navbarVisible: false,
       email: '',
       senha: '',
+      imagens: [
+        '/src/img/solar1.jpg',
+        '/src/img/solar2.jpg',
+        '/src/img/solar3.jpg',
+      ],
+      imagemAtual: 0,
     };
+  },
+  mounted() {
+    setInterval(this.proximaImagem, 5000);
   },
   setup() {
     const router = useRouter();
@@ -91,6 +116,14 @@ export default {
     login() {
       console.log('Email:', this.email, 'Senha:', this.senha);
     },
+    proximaImagem() {
+      this.imagemAtual = (this.imagemAtual + 1) % this.imagens.length;
+    },
+    anteriorImagem() {
+      this.imagemAtual =
+        (this.imagemAtual - 1 + this.imagens.length) % this.imagens.length;
+    },
+
   },
 };
 </script>
@@ -410,5 +443,97 @@ export default {
 .solar-image {
   width: 500px;
   margin-top: 2rem;
+}
+
+/* carrosel */
+.carrossel-container {
+  display: flex;
+  gap: 2rem;
+  align-items: stretch; 
+  justify-content: center;
+  margin-top: 3rem;
+  padding: 0 1rem;
+  flex-wrap: wrap;
+}
+
+
+.carrossel-texto {
+  width: 100%;
+  max-width: 600px;
+  height: 200px;
+  margin: 2rem auto;
+  text-align: left;
+  color: #4b5563;
+  background-color: #ffffff; 
+  padding: 2rem; 
+  border-radius: 8px; 
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
+}
+
+.carrossel-texto h2 {
+  font-size: 1.8rem;
+  color: #92400e;
+  margin-bottom: 0.5rem;
+}
+
+.carrossel-texto p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.carrossel {
+  width: 100%;
+  max-width: 600px;
+  height: 300px;
+  margin: 2rem auto;
+  overflow: hidden;
+  position: relative;
+  background-color: #fde68a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.carrossel-img {
+  width: 100%;
+  height: 100%; 
+  object-fit: cover;
+  display: block;
+}
+
+.carrossel-controles {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  transform: translateY(-50%);
+}
+
+.carrossel-controles button {
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 1.5rem;
+  border-radius: 0.5rem;
+}
+
+/* animação carrosel  */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
 }
 </style>
