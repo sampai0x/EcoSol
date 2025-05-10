@@ -2,6 +2,7 @@
   <div class="cadastro">
     <form @submit.prevent="enviarFormulario">
       <h2>Cadastro do Cliente</h2>
+
       <div class="form-group">
         <label for="nome">Nome:</label>
         <input type="text" id="nome" v-model="form.nome" required />
@@ -10,6 +11,7 @@
       <div class="form-group">
         <label for="email">Email:</label>
         <input type="email" id="email" v-model="form.email" required />
+        <span v-if="emailInvalido" class="erro">Email inválido</span>
       </div>
 
       <div class="form-group">
@@ -18,11 +20,28 @@
       </div>
 
       <div class="form-group">
+        <label for="confirmarSenha">Confirmar Senha:</label>
+        <input type="password" id="confirmarSenha" v-model="form.confirmarSenha" required />
+        <span v-if="senhasDiferentes" class="erro">As senhas não coincidem</span>
+      </div>
+
+      <div class="form-group">
         <label for="endereco">Endereço:</label>
         <input type="text" id="endereco" v-model="form.endereco" required />
       </div>
 
-      <button type="submit">Cadastrar</button>
+      <div class="form-group">
+        <label for="tipo">Tipo de Cliente:</label>
+        <select id="tipo" v-model="form.tipo" required>
+          <option value="" disabled>Selecione</option>
+          <option value="residencial">Residencial</option>
+          <option value="comercial">Comercial</option>
+        </select>
+      </div>
+
+      <button type="submit" :disabled="formInvalido">Cadastrar</button>
+
+      <p v-if="mensagem" class="mensagem">{{ mensagem }}</p>
     </form>
   </div>
 </template>
@@ -37,13 +56,29 @@ export default {
         nome: '',
         email: '',
         senha: '',
-        endereco: ''
-      }
+        confirmarSenha: '',
+        endereco: '',
+        tipo: ''
+      },
+      mensagem: ''
     };
+  },
+  computed: {
+    emailInvalido() {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return this.form.email && !regex.test(this.form.email);
+    },
+    senhasDiferentes() {
+      return this.form.senha && this.form.confirmarSenha && this.form.senha !== this.form.confirmarSenha;
+    },
+    formInvalido() {
+      return this.emailInvalido || this.senhasDiferentes;
+    }
   },
   methods: {
     enviarFormulario() {
-      alert(`Cliente ${this.form.nome} cadastrado com sucesso!`);
+      if (this.formInvalido) return;
+      this.mensagem = `Cliente ${this.form.nome} cadastrado com sucesso!`;
     }
   }
 };
@@ -55,7 +90,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(to bottom, #fef3c7, #fde68a);; 
+  background: linear-gradient(to bottom, #fef3c7, #fde68a);
   padding: 2rem;
 }
 
@@ -65,7 +100,7 @@ form {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -77,38 +112,53 @@ form {
 }
 
 label {
-  margin-bottom: 0.3rem;
   font-weight: bold;
+  margin-bottom: 0.3rem;
 }
 
-input {
-  padding: 0.5rem;
+input,
+select {
+  padding: 0.6rem;
   border: 1px solid #ccc;
   border-radius: 8px;
 }
 
 button {
-  margin-top: 1.5rem;
+  margin-top: 1.2rem;
   padding: 0.75rem;
   background-color: #f59e0b;
   color: white;
+  font-weight: bold;
   border: none;
   border-radius: 8px;
   cursor: pointer;
 }
 
-button:hover {
+button:disabled {
+  background-color: #fcd34d;
+  cursor: not-allowed;
+}
+
+button:hover:enabled {
   background-color: #d97706;
+}
+
+.erro {
+  color: red;
+  font-size: 0.85rem;
+}
+
+.mensagem {
+  margin-top: 1rem;
+  color: green;
+  font-weight: bold;
+  text-align: center;
 }
 
 @media (max-width: 480px) {
   form {
     padding: 1.2rem;
     width: 90%;
-  }
-
-  input, button {
-    font-size: 0.95rem;
   }
 }
 </style>
