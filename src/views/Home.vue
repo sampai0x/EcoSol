@@ -20,11 +20,17 @@
                 <li><a href="#">Contato</a></li>
               </ul>
             </div>
-            <form @submit.prevent="login" class="login-form">
-              <input type="email" v-model="email" placeholder="Email" required />
-              <input type="password" v-model="senha" placeholder="Senha" required />
-              <button type="submit">Entrar</button>
-            </form>
+            <div v-if="!isLoggedIn" class="login-container">
+              <form @submit.prevent="login" class="login-form">
+                <input type="email" v-model="email" placeholder="Email" required />
+                <input type="password" v-model="senha" placeholder="Senha" required />
+                <button type="submit">Entrar</button>
+              </form>
+            </div>
+            <div v-if="isLoggedIn" class="user-info">
+              <span>Bem-vindo!</span>
+              <button @click="logout">Sair</button>
+            </div>
           </div>
         </transition>
       </nav>
@@ -81,8 +87,10 @@
 <script>
 import { useRouter } from 'vue-router'
 
+
 export default {
   data() {
+
     return {
       navbarVisible: false,
       email: '',
@@ -97,6 +105,11 @@ export default {
   },
   mounted() {
     setInterval(this.proximaImagem, 5000);
+
+    const usuarioLogado = localStorage.getItem('usuarioLogado');
+    if (usuarioLogado) {
+      this.isLoggedIn = true;
+    }
   },
   setup() {
     const router = useRouter();
@@ -114,7 +127,19 @@ export default {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     login() {
-      console.log('Email:', this.email, 'Senha:', this.senha);
+      if (this.email && this.senha) {
+        localStorage.setItem('usuarioLogado', true);
+        this.isLoggedIn = true;
+        this.$router.push('/dashboard');
+      } else {
+        alert('Por favor, preencha ambos os campos de e-mail e senha');
+      }
+    },
+    logout() {
+      this.isLoggedIn = false;
+      localStorage.removeItem('usuarioLogado');
+      location.reload();
+      this.$router.push('/');
     },
     proximaImagem() {
       this.imagemAtual = (this.imagemAtual + 1) % this.imagens.length;
@@ -202,6 +227,34 @@ export default {
   max-width: 100%;
   box-sizing: border-box;
   flex-wrap: wrap;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #92400e;
+  font-size: 1.1rem;
+}
+
+.user-info span {
+  font-weight: bold;
+  color: #92400e;
+}
+
+.user-info button {
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.user-info button:hover {
+  background-color: #d97706;
 }
 
 .navbar-links ul {
@@ -449,7 +502,7 @@ export default {
 .carrossel-container {
   display: flex;
   gap: 2rem;
-  align-items: stretch; 
+  align-items: stretch;
   justify-content: center;
   margin-top: 3rem;
   padding: 0 1rem;
@@ -464,10 +517,10 @@ export default {
   margin: 2rem auto;
   text-align: left;
   color: #4b5563;
-  background-color: #ffffff; 
-  padding: 2rem; 
-  border-radius: 8px; 
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .carrossel-texto h2 {
@@ -497,7 +550,7 @@ export default {
 
 .carrossel-img {
   width: 100%;
-  height: 100%; 
+  height: 100%;
   object-fit: cover;
   display: block;
 }
