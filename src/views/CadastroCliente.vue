@@ -5,23 +5,30 @@
 
       <div class="form-group">
         <label for="nome">Nome:</label>
-        <input type="text" id="nome" v-model="form.nome" required />
+        <input type="text" id="nome" v-model="form.nome" required placeholder="Digite seu nome" />
+      </div>
+
+      <div class="form-group">
+        <label for="cpfCnpj">CPF/CNPJ:</label>
+        <input type="text" id="cpfCnpj" v-model="form.cpfCnpj" required placeholder="Digite o CPF ou CNPJ" />
+        <span v-if="cpfCnpjInvalido" class="erro">CPF ou CNPJ inválido</span>
       </div>
 
       <div class="form-group">
         <label for="email">Email:</label>
-        <input type="email" id="email" v-model="form.email" required />
+        <input type="email" id="email" v-model="form.email" required placeholder="Digite seu email" />
         <span v-if="emailInvalido" class="erro">Email inválido</span>
       </div>
 
       <div class="form-group">
         <label for="senha">Senha:</label>
-        <input type="password" id="senha" v-model="form.senha" required />
+        <input type="password" id="senha" v-model="form.senha" required placeholder="Digite sua senha" />
       </div>
 
       <div class="form-group">
         <label for="confirmarSenha">Confirmar Senha:</label>
-        <input type="password" id="confirmarSenha" v-model="form.confirmarSenha" required />
+        <input type="password" id="confirmarSenha" v-model="form.confirmarSenha" required
+          placeholder="Digite sua senha" />
         <span v-if="senhasDiferentes" class="erro">As senhas não coincidem</span>
       </div>
 
@@ -58,7 +65,8 @@ export default {
         senha: '',
         confirmarSenha: '',
         endereco: '',
-        tipo: ''
+        tipo: '',
+        cpfCnpj: ''
       },
       mensagem: ''
     };
@@ -71,8 +79,12 @@ export default {
     senhasDiferentes() {
       return this.form.senha && this.form.confirmarSenha && this.form.senha !== this.form.confirmarSenha;
     },
+    cpfCnpjInvalido() {
+      const val = this.form.cpfCnpj.replace(/\D/g, '');
+      return !(val.length === 11 || val.length === 14);
+    },
     formInvalido() {
-      return this.emailInvalido || this.senhasDiferentes;
+      return this.emailInvalido || this.senhasDiferentes || this.cpfCnpjInvalido;
     }
   },
   methods: {
