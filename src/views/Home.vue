@@ -18,6 +18,9 @@
                 <li><a href="#">Início</a></li>
                 <li><a href="#">Sobre</a></li>
                 <li><a href="#">Contato</a></li>
+                <div v-if="isLoggedIn">
+                  <li><a href="#" @click="goToDashboard">Dashboard</a></li>
+                </div>
               </ul>
             </div>
             <div v-if="!isLoggedIn" class="login-container">
@@ -28,7 +31,7 @@
               </form>
             </div>
             <div v-if="isLoggedIn" class="user-info">
-              <span>Bem-vindo!</span>
+              <span>Bem-vindo {{ usuario?.nome }}!</span>
               <button @click="logout">Sair</button>
             </div>
           </div>
@@ -85,38 +88,21 @@
 </template>
 
 <script>
-import { useRouter } from 'vue-router'
-
-
 export default {
   data() {
-
     return {
       navbarVisible: false,
       email: '',
       senha: '',
+      isLoggedIn: false,
+      usuario: null,
       imagens: [
         '/src/img/solar1.jpg',
         '/src/img/solar2.jpg',
-        '/src/img/solar3.jpg',
+        '/src/img/solar3.jpg'
       ],
-      imagemAtual: 0,
+      imagemAtual: 0
     };
-  },
-  mounted() {
-    setInterval(this.proximaImagem, 5000);
-
-    const usuarioLogado = localStorage.getItem('usuarioLogado');
-    if (usuarioLogado) {
-      this.isLoggedIn = true;
-    }
-  },
-  setup() {
-    const router = useRouter();
-    const irPara = (destino) => {
-      router.push(`/${destino}`);
-    };
-    return { irPara };
   },
   methods: {
     toggleNavbar() {
@@ -127,31 +113,47 @@ export default {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     login() {
-      if (this.email && this.senha) {
-        localStorage.setItem('usuarioLogado', true);
+      const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+
+      const usuarioValido = usuarios.find(usuario =>
+        usuario.email === this.email && usuario.senha === this.senha
+      );
+
+      if (usuarioValido) {
+        localStorage.setItem('usuarioLogado', JSON.stringify(usuarioValido));
         this.isLoggedIn = true;
         this.$router.push('/dashboard');
       } else {
-        alert('Por favor, preencha ambos os campos de e-mail e senha');
+        alert('E-mail ou senha incorretos');
       }
     },
     logout() {
       this.isLoggedIn = false;
       localStorage.removeItem('usuarioLogado');
-      location.reload();
       this.$router.push('/');
+      location.reload();
+    },
+    goToDashboard() {
+      this.$router.push('/dashboard');
+    },
+    irPara(destino) {
+      this.$router.push(`/${destino}`);
     },
     proximaImagem() {
       this.imagemAtual = (this.imagemAtual + 1) % this.imagens.length;
-    },
-    anteriorImagem() {
-      this.imagemAtual =
-        (this.imagemAtual - 1 + this.imagens.length) % this.imagens.length;
-    },
-
+    }
   },
+  mounted() {
+    setInterval(this.proximaImagem, 5000);
+    const usuarioLogado = localStorage.getItem('usuarioLogado');
+    if (usuarioLogado) {
+      this.isLoggedIn = true;
+      this.usuario = JSON.parse(usuarioLogado);
+    }
+  }
 };
 </script>
+
 
 <style scoped>
 /* landing  */
