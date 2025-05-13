@@ -1,7 +1,9 @@
 <template>
+  <!-- criar uma notificação para ficar em todas as paginas -->
   <div class="dashboard">
     <nav class="dashboard-nav">
       <ul>
+        <li><a href="#" @click="goToHome">Home</a></li>
         <li><a href="#" @click="goToPerfil">Meu Perfil</a></li>
         <li><a href="#" @click="logout">Sair</a></li>
       </ul>
@@ -51,7 +53,10 @@ export default {
             this.$router.push('/');
         },
         goToPerfil() {
-            this.$router.push('/perfil');
+            this.$router.push('/PerfilFornecedor');
+        },
+        goToHome() {
+          this.$router.push('/');
         },
         goToOfertaEnergia() {
             this.$router.push('/OfertaEnergia');
