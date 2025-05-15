@@ -3,13 +3,27 @@
     <h1>Meu Perfil</h1>
 
     <div class="perfil-card">
-      <p><strong>Nome:</strong> {{ perfil.nome }}</p>
-      <p><strong>E-mail:</strong> {{ perfil.email }}</p>
-      <p><strong>Tipo de Cliente:</strong> {{ perfil.tipoCliente }}</p>
-      <p><strong>Data de Cadastro:</strong> {{ perfil.dataCadastro }}</p>
+      <div v-if="!editando">
+        <p><strong>Nome:</strong> {{ perfil.nome }}</p>
+        <p><strong>E-mail:</strong> {{ perfil.email }}</p>
+        <p><strong>Tipo de Conta:</strong> {{ perfil.tipo }}</p>
+        <p><strong>CPF/CNPJ:</strong> {{ perfil.cpfCnpj }}</p>
+        <p><strong>Endereço:</strong> {{ perfil.endereco }}</p>
+      </div>
+      <div v-else>
+        <label>Nome: <input v-model="perfil.nome" /></label><br />
+        <label>Email: <input v-model="perfil.email" /></label><br />
+        <label>Endereço: <input v-model="perfil.endereco" /></label><br />
+        <p><strong>Tipo de Conta:</strong> {{ perfil.tipo }}</p>
+        <p><strong>CPF/CNPJ:</strong> {{ perfil.cpfCnpj }}</p>
+      </div>
     </div>
 
-    <button @click="editarPerfil">Editar Perfil</button>
+    <div>
+      <button v-if="!editando" @click="editarPerfil">Editar Perfil</button>
+      <button v-else @click="salvarEdicao">Salvar</button>
+      <button v-if="editando" @click="cancelarEdicao">Cancelar</button>
+    </div>
   </div>
 </template>
 
@@ -19,9 +33,13 @@ import { ref, onMounted } from 'vue'
 const perfil = ref({
   nome: '',
   email: '',
-  tipoCliente: '',
-  dataCadastro: ''
+  tipo: '',
+  cpfCnpj: '',
+  endereco: ''
 })
+
+const originalPerfil = ref({})
+const editando = ref(false)
 
 const carregarPerfil = () => {
   const usuario = JSON.parse(localStorage.getItem('usuarioLogado'))
@@ -29,15 +47,37 @@ const carregarPerfil = () => {
     perfil.value = {
       nome: usuario.nome,
       email: usuario.email,
-      tipoCliente: usuario.tipoCliente,
-      dataCadastro: usuario.dataCadastro || '2025-01-01' 
+      tipo: usuario.tipo,
+      cpfCnpj: usuario.cpfCnpj,
+      endereco: usuario.endereco
     }
   }
 }
 
 const editarPerfil = () => {
-  alert('Funcionalidade de edição ainda será implementada.')
+  editando.value = true
 }
+
+const salvarEdicao = () => {
+  localStorage.setItem('usuarioLogado', JSON.stringify(perfil.value))
+
+
+  const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]')
+  const index = usuarios.findIndex(u => u.email === originalPerfil.value.email)
+
+  if (index !== -1) {
+    usuarios[index] = { ...perfil.value }
+    localStorage.setItem('usuarios', JSON.stringify(usuarios))
+  }
+
+  editando.value = false
+}
+
+const cancelarEdicao = () => {
+  perfil.value = { ...originalPerfil.value }
+  editando.value = false
+}
+
 
 onMounted(() => {
   carregarPerfil()

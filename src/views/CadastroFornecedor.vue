@@ -109,7 +109,7 @@ export default {
         nome: this.form.nome,
         email: this.form.email,
         senha: this.form.senha,
-        tipo: 'fornecedor',
+        tipo: 'Fornecedor',
         cpfCnpj: this.form.cpfCnpj,
         endereco: this.form.endereco
       });
@@ -118,7 +118,7 @@ export default {
       localStorage.setItem('usuarios', JSON.stringify(usuariosSalvos));
 
 
-      this.$router.push('/Dashboard');
+      this.$router.push('/DashboardFornecedor');
     }
 
   }

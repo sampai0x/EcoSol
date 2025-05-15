@@ -122,7 +122,7 @@ export default {
       if (usuarioValido) {
         localStorage.setItem('usuarioLogado', JSON.stringify(usuarioValido));
         this.isLoggedIn = true;
-        this.$router.push('/dashboard');
+        this.$router.push('/dashboardfornecedor');
       } else {
         alert('E-mail ou senha incorretos');
       }
@@ -134,7 +134,7 @@ export default {
       location.reload();
     },
     goToDashboard() {
-      this.$router.push('/dashboard');
+      this.$router.push('/dashboardfornecedor');
     },
     irPara(destino) {
       this.$router.push(`/${destino}`);
