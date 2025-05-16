@@ -50,7 +50,7 @@ export default {
       console.log('Ofertas após adição:', offers);
 
      
-      this.$router.push({ name: 'Dashboard' }).then(() => {
+      this.$router.push({ name: 'DashboardFornecedor' }).then(() => {
         this.$router.go();
       });
     }
