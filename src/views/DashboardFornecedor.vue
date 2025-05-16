@@ -1,5 +1,5 @@
 <template>
-  <!-- criar uma notificação para ficar em todas as paginas -->
+  <Toast :message="toastMessage" :key="toastMessage" />
   <div class="dashboard">
     <nav class="dashboard-nav">
       <ul>
@@ -38,135 +38,196 @@
 
 
 <script>
+import Toast from '../components/Toast.vue'
 export default {
-    data() {
-        return {
-            offers: []
-        };
+  data() {
+    return {
+      toastMessage: '',
+      offers: []
+    };
+  },
+  mounted() {
+    this.loadOffers();
+  },
+  methods: {
+    logout() {
+      localStorage.removeItem('usuarioLogado');
+      this.$router.push('/');
     },
-    mounted() {
-        this.loadOffers();
+    goToPerfil() {
+      this.$router.push('/PerfilFornecedor');
     },
-    methods: {
-        logout() {
-            localStorage.removeItem('usuarioLogado');
-            this.$router.push('/');
-        },
-        goToPerfil() {
-            this.$router.push('/PerfilFornecedor');
-        },
-        goToHome() {
-          this.$router.push('/');
-        },
-        goToOfertaEnergia() {
-            this.$router.push('/OfertaEnergia');
-        },
-        loadOffers() {
-            const savedOffers = JSON.parse(localStorage.getItem('userOffers') || '[]');
-            const validOffers = savedOffers.filter(
-                offer => offer && offer.quantidade && offer.preco
-            );
-            console.log('Ofertas carregadas:', validOffers);
-            this.offers = validOffers;
-        },
-        removerOferta(index) {
-            this.offers.splice(index, 1);
-            localStorage.setItem('userOffers', JSON.stringify(this.offers));
-        }
+    goToHome() {
+      this.$router.push('/');
+    },
+    goToOfertaEnergia() {
+      this.$router.push('/OfertaEnergia');
+    },
+    loadOffers() {
+      const savedOffers = JSON.parse(localStorage.getItem('userOffers') || '[]');
+      const validOffers = savedOffers.filter(
+        offer => offer && offer.quantidade && offer.preco
+      );
+      console.log('Ofertas carregadas:', validOffers);
+      this.offers = validOffers;
+    },
+    removerOferta(index) {
+      this.offers.splice(index, 1);
+      localStorage.setItem('userOffers', JSON.stringify(this.offers));
+      this.toastMessage = '';
+      this.$nextTick(() => {
+        this.toastMessage = 'Oferta removida com sucesso!';
+      });
     }
+  }
 };
 </script>
 
 <style scoped>
 .dashboard {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;  
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dashboard-nav {
-    width: 100%;  
-    background-color: #ffffff; 
-    padding: 20px;
-    border-bottom: 1px solid #ddd; 
-    
+  background-color: #ffffff;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .dashboard-nav ul {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    justify-content: space-around; 
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .dashboard-nav li {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .dashboard-nav a {
-    text-decoration: none;
-    color: #ff8800; 
-    font-weight: bold;
-    display: block;
-    padding: 12px 18px;  
-    border-radius: 8px;  
-    transition: all 0.3s ease;  
-    text-transform: uppercase;
+  text-decoration: none;
+  color: #ff8800;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .dashboard-nav a:hover {
-    background-color: #ff8800;  
-    color: #fff;  
-    transform: scale(1.05); 
-}
-
-.dashboard-nav a:active {
-    background-color: #ff8800;  
-    color: #fff;  
-    transform: scale(1.05);
-}
-
-.dashboard-content {
-    padding: 20px;
-    margin-top: 20px;  
-    flex-grow: 1;
-    overflow-y: auto;  
-}
-.offers {
-  margin-top: 2rem;
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-}
-
-.offers h2 {
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
-
-button {
   background-color: #ff8800;
   color: white;
-  padding: 0.5rem 1rem;
-  margin-bottom: 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  transform: translateY(-2px);
 }
 
-button:hover {
-  background-color: #d97706;
+
+.dashboard-content {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  flex-grow: 1;
+}
+
+.dashboard-content h1 {
+  font-size: 2rem;
+  color: #333;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.offers {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+
+.offers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+
+.offers h2 {
+  font-size: 1.4rem;
+  color: #ff8800;
+}
+
+.offers-header button {
+  background-color: #ff8800;
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+
+.offers-header button:hover {
+  background-color: #e67300;
+}
+
+/* LISTA DE OFERTAS */
+.no-offers {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 1rem;
+}
+
+.offers-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .offer-item {
+  background: #fdf5e6;
+  border: 1px solid #ffddaa;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
-  padding: 1rem;
-  margin: 0.5rem 0;
-  background: #f1f1f1;
-  border-radius: 8px;
+  align-items: center;
 }
 
+.offer-item strong {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.offer-item span {
+  color: #777;
+}
+
+.offer-item button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+
+.offer-item button:hover {
+  background-color: #c0392b;
+}
 </style>
