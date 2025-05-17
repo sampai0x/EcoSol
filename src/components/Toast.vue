@@ -15,8 +15,8 @@ const props = defineProps({
 
 const visible = ref(false)
 
-watchEffect(() => {
-  if (props.message) {
+watch(() => props.message, (newMessage) => {
+  if (newMessage) {
     visible.value = true
     setTimeout(() => {
       visible.value = false
