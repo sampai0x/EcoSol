@@ -1,11 +1,12 @@
 <template>
-  <Toast :message="toastMessage" :key="toastMessage" />
+  <Toast :message="toastMessage" />
+
   <div class="dashboard">
     <nav class="dashboard-nav">
       <ul>
-        <li><a href="#" @click="goToHome">Home</a></li>
-        <li><a href="#" @click="goToPerfil">Meu Perfil</a></li>
-        <li><a href="#" @click="logout">Sair</a></li>
+        <li><a href="#" @click.prevent="goToHome">Home</a></li>
+        <li><a href="#" @click.prevent="goToPerfil">Meu Perfil</a></li>
+        <li><a href="#" @click.prevent="logout">Sair</a></li>
       </ul>
     </nav>
 
@@ -36,54 +37,56 @@
   </div>
 </template>
 
-
 <script>
 import Toast from '../components/Toast.vue'
+
 export default {
+  components: { Toast },
   data() {
     return {
       toastMessage: '',
       offers: []
-    };
+    }
   },
   mounted() {
-    this.loadOffers();
+    this.loadOffers()
   },
   methods: {
     logout() {
-      localStorage.removeItem('usuarioLogado');
-      this.$router.push('/');
+      localStorage.removeItem('usuarioLogado')
+      this.$router.push('/')
     },
     goToPerfil() {
-      this.$router.push('/PerfilFornecedor');
+      this.$router.push('/PerfilFornecedor')
     },
     goToHome() {
-      this.$router.push('/');
+      this.$router.push('/')
     },
     goToOfertaEnergia() {
-      this.$router.push('/OfertaEnergia');
+      this.$router.push('/OfertaEnergia')
     },
     loadOffers() {
-      const savedOffers = JSON.parse(localStorage.getItem('userOffers') || '[]');
-      const validOffers = savedOffers.filter(
+      const savedOffers = JSON.parse(localStorage.getItem('userOffers') || '[]')
+      this.offers = savedOffers.filter(
         offer => offer && offer.quantidade && offer.preco
-      );
-      console.log('Ofertas carregadas:', validOffers);
-      this.offers = validOffers;
+      )
     },
     removerOferta(index) {
-      this.offers.splice(index, 1);
-      localStorage.setItem('userOffers', JSON.stringify(this.offers));
-      this.toastMessage = '';
-      this.$nextTick(() => {
-        this.toastMessage = 'Oferta removida com sucesso!';
-      });
+      this.offers.splice(index, 1)
+      localStorage.setItem('userOffers', JSON.stringify(this.offers))
+
+      // Reset toastMessage para disparar novamente
+      this.toastMessage = ''
+      setTimeout(() => {
+        this.toastMessage = 'Oferta removida com sucesso!'
+      }, 50)
     }
   }
-};
+}
 </script>
 
 <style scoped>
+/* Seu CSS de dashboard aqui (copie do seu código anterior) */
 .dashboard {
   display: flex;
   flex-direction: column;
@@ -93,7 +96,7 @@ export default {
 }
 
 .dashboard-nav {
-  background-color: #ffffff;
+  background-color: #fff;
   padding: 1rem 2rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   position: sticky;
@@ -108,10 +111,6 @@ export default {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-.dashboard-nav li {
-  margin-bottom: 0;
 }
 
 .dashboard-nav a {
@@ -129,7 +128,6 @@ export default {
   color: white;
   transform: translateY(-2px);
 }
-
 
 .dashboard-content {
   max-width: 900px;
@@ -152,14 +150,12 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-
 .offers-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
-
 
 .offers h2 {
   font-size: 1.4rem;
@@ -177,12 +173,10 @@ export default {
   transition: background-color 0.3s ease;
 }
 
-
 .offers-header button:hover {
   background-color: #e67300;
 }
 
-/* LISTA DE OFERTAS */
 .no-offers {
   text-align: center;
   color: #999;
@@ -225,7 +219,6 @@ export default {
   font-weight: bold;
   transition: background-color 0.3s;
 }
-
 
 .offer-item button:hover {
   background-color: #c0392b;
