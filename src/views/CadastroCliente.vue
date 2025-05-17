@@ -37,22 +37,12 @@
         <input type="text" id="endereco" v-model="form.endereco" required />
       </div>
 
-      <div class="form-group">
-        <label for="tipo">Tipo de Cliente:</label>
-        <select id="tipo" v-model="form.tipo" required>
-          <option value="" disabled>Selecione</option>
-          <option value="residencial">Residencial</option>
-          <option value="comercial">Comercial</option>
-        </select>
-      </div>
-
       <button type="submit" :disabled="formInvalido">Cadastrar</button>
 
       <p v-if="mensagem" class="mensagem">{{ mensagem }}</p>
     </form>
   </div>
 </template>
-
 
 <script>
 export default {
@@ -65,7 +55,6 @@ export default {
         senha: '',
         confirmarSenha: '',
         endereco: '',
-        tipo: '',
         cpfCnpj: ''
       },
       mensagem: ''
@@ -90,7 +79,32 @@ export default {
   methods: {
     enviarFormulario() {
       if (this.formInvalido) return;
-      this.mensagem = `Cliente ${this.form.nome} cadastrado com sucesso!`;
+
+    
+      const usuariosSalvos = JSON.parse(localStorage.getItem('usuarios') || '[]');
+
+      
+      const jaExiste = usuariosSalvos.some(u => u.email === this.form.email);
+      if (jaExiste) {
+        alert('Este e-mail já está cadastrado.');
+        return;
+      }
+
+      
+      usuariosSalvos.push({
+        nome: this.form.nome,
+        email: this.form.email,
+        senha: this.form.senha,
+        tipo: 'Cliente', 
+        cpfCnpj: this.form.cpfCnpj,
+        endereco: this.form.endereco
+      });
+
+     
+      localStorage.setItem('usuarios', JSON.stringify(usuariosSalvos));
+
+  
+      this.$router.push('/DashboardCliente');
     }
   }
 };
