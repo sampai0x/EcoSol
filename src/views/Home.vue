@@ -122,7 +122,10 @@ export default {
       if (usuarioValido) {
         localStorage.setItem('usuarioLogado', JSON.stringify(usuarioValido));
         this.isLoggedIn = true;
-        this.$router.push('/dashboardfornecedor');
+        this.usuario = usuarioValido;
+
+        
+        this.goToDashboard();
       } else {
         alert('E-mail ou senha incorretos');
       }
@@ -134,7 +137,13 @@ export default {
       location.reload();
     },
     goToDashboard() {
-      this.$router.push('/dashboardfornecedor');
+      if (this.usuario.tipo === 'Fornecedor') {
+        this.$router.push('/dashboardfornecedor');
+      } else if (this.usuario.tipo === 'Cliente') {
+        this.$router.push('/dashboardcliente');
+      } else if (this.usuario.tipo === 'Empresa') {
+        this.$router.push('/painelempresa');
+      }
     },
     irPara(destino) {
       this.$router.push(`/${destino}`);
@@ -497,7 +506,7 @@ export default {
 /* imagem */
 .solar-image {
   width: 500px;
-  margin-top: 2rem;
+  margin-top: 3rem;
 }
 
 /* carrosel */
