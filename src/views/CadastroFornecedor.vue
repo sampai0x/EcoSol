@@ -98,28 +98,30 @@ export default {
 
       const usuariosSalvos = JSON.parse(localStorage.getItem('usuarios') || '[]');
 
-
       const jaExiste = usuariosSalvos.some(u => u.email === this.form.email);
       if (jaExiste) {
         alert('Este e-mail já está cadastrado.');
         return;
       }
 
-      usuariosSalvos.push({
+      const novoUsuario = {
         nome: this.form.nome,
         email: this.form.email,
         senha: this.form.senha,
         tipo: 'Fornecedor',
         cpfCnpj: this.form.cpfCnpj,
         endereco: this.form.endereco
-      });
+      };
 
-
+      usuariosSalvos.push(novoUsuario);
       localStorage.setItem('usuarios', JSON.stringify(usuariosSalvos));
 
+     
+      localStorage.setItem('usuarioLogado', JSON.stringify(novoUsuario));
 
       this.$router.push('/DashboardFornecedor');
     }
+
 
   }
 };

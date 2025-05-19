@@ -75,7 +75,7 @@ export default {
       this.offers.splice(index, 1)
       localStorage.setItem('userOffers', JSON.stringify(this.offers))
 
-      // Reset toastMessage para disparar novamente
+    
       this.toastMessage = ''
       setTimeout(() => {
         this.toastMessage = 'Oferta removida com sucesso!'
@@ -86,7 +86,6 @@ export default {
 </script>
 
 <style scoped>
-/* Seu CSS de dashboard aqui (copie do seu código anterior) */
 .dashboard {
   display: flex;
   flex-direction: column;

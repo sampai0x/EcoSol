@@ -16,8 +16,8 @@
             <div class="navbar-links">
               <ul>
                 <li><a href="#">Início</a></li>
-                <li><a href="#">Sobre</a></li>
-                <li><a href="#">Contato</a></li>
+                <li><a href="#sobre">Sobre</a></li>
+                <li><a href="#foot">Contato</a></li>
                 <div v-if="isLoggedIn">
                   <li><a href="#" @click="goToDashboard">Dashboard</a></li>
                 </div>
@@ -49,10 +49,10 @@
         Já tem uma conta? <a href="#" @click.prevent="mostrarLogin">Faça login</a>
       </p>
       <!-- meio da pagina -->
-      <div class="meio">
+      <div class="meio" id="sobre">
         <div>
           <i class="fas fa-leaf fa-2x" style="color:#16a34a;"></i>
-          <h1 id="sobre">Sobre o Projeto</h1>
+          <h1>Sobre o Projeto</h1>
           <p>
             Somos uma empresa com um projeto que propõe o desenvolvimento de uma plataforma digital para gerenciamento
             de energia renovável...
@@ -82,8 +82,16 @@
           </transition>
         </div>
       </div>
-
     </section>
+    <!-- footer -->
+      <footer class="footer">
+        <div class="footer-content" id="foot">
+          <p><strong>Contato:</strong></p>
+          <p>Email: contato@ecosol.com</p>
+          <p>Telefone: (11) 99999-9999</p>
+          <p>Endereço: Rua da Energia, 123 - Sustentável, SP</p>
+        </div>
+      </footer>
   </body>
 </template>
 
@@ -124,7 +132,7 @@ export default {
         this.isLoggedIn = true;
         this.usuario = usuarioValido;
 
-        
+
         this.goToDashboard();
       } else {
         alert('E-mail ou senha incorretos');
@@ -599,5 +607,28 @@ export default {
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateX(-20px);
+}
+
+/* footer */
+
+.footer {
+  background-color: #ffffff; 
+  padding: 2rem;
+  text-align: center;
+  border-top: 2px solid #f59e0b; 
+  margin-top: 4rem;
+  
+}
+
+.footer p,
+.footer a {
+  color: #92400e; 
+  font-weight: 500;
+  font-size: 1.05rem;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
 }
 </style>
