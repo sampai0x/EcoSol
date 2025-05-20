@@ -1,5 +1,13 @@
 <template>
   <div class="cadastro">
+    <nav class="navbar">
+      <div class="navbar-container">
+        <div class="logo">
+          <img src="/src/img/EcoSolNavBar.png" alt="Logo" class="logo-img" />
+        </div>
+        <button class="voltar" @click="goTohome()">← Voltar para Home</button>
+      </div>
+    </nav>
     <form @submit.prevent="enviarFormulario">
       <h2>Cadastro do Cliente</h2>
 
@@ -78,6 +86,9 @@ export default {
     }
   },
   methods: {
+    goTohome() {
+      this.$router.push('/');
+    },
     enviarFormulario() {
       if (this.formInvalido) return;
 
@@ -101,7 +112,7 @@ export default {
       usuariosSalvos.push(novoUsuario);
       localStorage.setItem('usuarios', JSON.stringify(usuariosSalvos));
 
-    
+
       localStorage.setItem('usuarioLogado', JSON.stringify(novoUsuario));
 
       this.$router.push('/DashboardCliente');
@@ -112,8 +123,62 @@ export default {
 </script>
 
 <style scoped>
+.navbar {
+  width: 100%;
+  background-color: #ffffff;
+  padding: 1rem 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.logo-img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+
+.voltar {
+  background-color: #ff8800;
+  color: white;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.voltar:hover {
+  background-color: #d97706;
+}
+
 .cadastro {
   min-height: 100vh;
+  margin-top: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
