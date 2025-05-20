@@ -1,10 +1,7 @@
 <template>
   <div class="admin-dashboard">
     <nav class="admin-nav">
-      <ul>
-        <li><a href="#" @click.prevent="goToHome">Home</a></li>
-        <li><a href="#" @click.prevent="logout">Sair</a></li>
-      </ul>
+      <button @click="voltarPainel">← Voltar ao Painel da Empresa</button>
     </nav>
 
     <section class="admin-content">
@@ -13,7 +10,6 @@
       <section class="admin-requests">
         <div class="admin-requests-header">
           <h2>Pedidos de Energia</h2>
-          <button @click="abrirModalNovoPedido">+ Adicionar Pedido</button>
         </div>
 
         <div v-if="pedidos.length === 0" class="no-requests">
@@ -26,7 +22,7 @@
               <strong>{{ pedido.quantidade }} kWh</strong><br />
               <span>Data do pedido: {{ pedido.data }}</span>
             </div>
-            <button @click="removerPedido(index)">Remover</button>
+            <button @click="removerPedido(index)">Recusar</button>
           </li>
         </ul>
       </section>
@@ -64,6 +60,9 @@ export default {
     this.carregarPedidos()
   },
   methods: {
+    voltarPainel() {
+      this.$router.push('/painelempresa');
+    },
     verificarAcesso() {
       const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'))
       if (!usuarioLogado || !usuarioLogado.isAdmin) {
@@ -121,36 +120,28 @@ export default {
 }
 
 .admin-nav {
-  background-color: #ff8800;
+  background-color: #fff8e1;
   padding: 1rem 2rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.admin-nav ul {
+  border-bottom: 1px solid #ffd95c;
   display: flex;
-  justify-content: center;
-  gap: 2rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  justify-content: flex-start;
 }
 
-.admin-nav a {
-  text-decoration: none;
+.admin-nav button {
+  background-color: #ff9800;
   color: white;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 0.6rem 1rem;
+  font-weight: bold;
+  border: none;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
+  cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-.admin-nav a:hover {
-  background-color: #cc6e00;
+.admin-nav button:hover {
+  background-color: #e68900;
 }
+
 
 .admin-content {
   max-width: 900px;
@@ -170,7 +161,7 @@ export default {
   background: white;
   padding: 2rem;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .admin-requests-header {
@@ -251,8 +242,11 @@ export default {
 /* Modal */
 .modal {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0,0,0,0.4);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
