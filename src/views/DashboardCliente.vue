@@ -19,7 +19,7 @@
         <!-- Formulário de novo pedido -->
         <form @submit.prevent="fazerPedido" class="pedido-form">
           <label for="quantidade">Quantidade de energia (kWh):</label>
-          <input type="number" id="quantidade" v-model.number="novaQuantidade" min="1" required />
+          <input type="number" id="quantidade" v-model.number="novaQuantidade" min="1" max="50" required />
           <button type="submit">Fazer Pedido</button>
         </form>
 
@@ -55,6 +55,13 @@ export default {
   },
   methods: {
     fazerPedido() {
+      const limiteMaximo = 50;
+
+      if (this.novaQuantidade > limiteMaximo) {
+        alert(`O pedido não pode ultrapassar ${limiteMaximo} kWh.`);
+        return;
+      }
+
       const novoPedido = {
         quantidade: this.novaQuantidade,
         data: new Date().toLocaleDateString('pt-BR')
