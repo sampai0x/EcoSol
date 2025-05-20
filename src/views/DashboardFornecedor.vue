@@ -26,10 +26,11 @@
         <ul class="offers-list">
           <li v-for="(offer, index) in offers" :key="index" class="offer-item">
             <div>
-              <strong>{{ offer.quantidade }} kWh</strong> <br />
-              <span>R$ {{ offer.preco }} por kWh</span>
+              <strong>{{ offer.quantidade }} kWh</strong><br />
+              <span>R$ {{ offer.preco }} por kWh</span><br />
+              <span v-if="offer.contratada" style="color: green; font-weight: bold;">Contrato Firmado</span>
             </div>
-            <button @click="removerOferta(index)">Remover</button>
+            <button v-if="!offer.contratada" @click="removerOferta(index)">Cancelar</button>
           </li>
         </ul>
       </section>
@@ -66,20 +67,25 @@ export default {
       this.$router.push('/OfertaEnergia')
     },
     loadOffers() {
-      const savedOffers = JSON.parse(localStorage.getItem('userOffers') || '[]')
-      this.offers = savedOffers.filter(
-        offer => offer && offer.quantidade && offer.preco
-      )
+      const user = JSON.parse(localStorage.getItem('usuarioLogado'));
+      const todasOfertas = JSON.parse(localStorage.getItem('ofertasEnergia')) || {};
+      if (user && todasOfertas[user.email]) {
+        this.offers = [todasOfertas[user.email]];
+      } else {
+        this.offers = [];
+      }
     },
-    removerOferta(index) {
-      this.offers.splice(index, 1)
-      localStorage.setItem('userOffers', JSON.stringify(this.offers))
+    removerOferta() {
+      const user = JSON.parse(localStorage.getItem('usuarioLogado'));
+      const ofertas = JSON.parse(localStorage.getItem('ofertasEnergia')) || {};
+      delete ofertas[user.email];
+      localStorage.setItem('ofertasEnergia', JSON.stringify(ofertas));
+      this.offers = [];
 
-    
-      this.toastMessage = ''
+      this.toastMessage = '';
       setTimeout(() => {
-        this.toastMessage = 'Oferta removida com sucesso!'
-      }, 50)
+        this.toastMessage = 'Oferta removida com sucesso!';
+      }, 50);
     }
   }
 }
