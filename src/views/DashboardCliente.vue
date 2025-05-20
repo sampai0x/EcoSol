@@ -16,6 +16,14 @@
           <h2>Pedidos de Energia</h2>
         </div>
 
+        <!-- Formulário de novo pedido -->
+        <form @submit.prevent="fazerPedido" class="pedido-form">
+          <label for="quantidade">Quantidade de energia (kWh):</label>
+          <input type="number" id="quantidade" v-model.number="novaQuantidade" min="1" required />
+          <button type="submit">Fazer Pedido</button>
+        </form>
+
+        <!-- Lista de pedidos -->
         <div v-if="pedidos.length === 0" class="no-requests">
           Você ainda não tem pedidos de energia registrados.
         </div>
@@ -38,13 +46,24 @@ export default {
   name: 'DashboardCliente',
   data() {
     return {
-      pedidos: []
+      pedidos: [],
+      novaQuantidade: null
     };
   },
   mounted() {
     this.carregarPedidos();
   },
   methods: {
+    fazerPedido() {
+      const novoPedido = {
+        quantidade: this.novaQuantidade,
+        data: new Date().toLocaleDateString('pt-BR')
+      };
+
+      this.pedidos.push(novoPedido);
+      localStorage.setItem('pedidosCliente', JSON.stringify(this.pedidos));
+      this.novaQuantidade = null;
+    },
     carregarPedidos() {
       const pedidosSalvos = JSON.parse(localStorage.getItem('pedidosCliente') || '[]');
       this.pedidos = pedidosSalvos;
@@ -148,6 +167,41 @@ export default {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.pedido-form {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2rem;
+  gap: 0.5rem;
+}
+
+.pedido-form label {
+  font-weight: bold;
+  color: #555;
+}
+
+.pedido-form input {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.pedido-form button {
+  align-self: flex-start;
+  background-color: #ff8800;
+  color: white;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pedido-form button:hover {
+  background-color: #e67300;
 }
 
 .request-item {
