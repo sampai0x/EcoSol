@@ -12,6 +12,7 @@ import DashboardCliente from '../views/DashboardCliente.vue'
 import AdminPedidos from '../views/AdminPedidos.vue'
 import PainelEmpresa from '../views/PainelEmpresa.vue'
 import UsuariosView from '../views/UsuariosView.vue'
+import AdminOfertas from '../views/AdminOfertas.vue'
 
 
 
@@ -26,9 +27,10 @@ const routes = [
   { path: '/PerfilFornecedor', name: 'PerfilFornecedor', component: PerfilFornecedor },
   { path: '/PerfilCliente', name: 'PerfilCliente', component: PerfilCliente},
   { path: '/DashboardCliente', name: 'DashboardCliente', component: DashboardCliente },
-  { path: '/AdminPedidos', name: 'AdminPedidos', component: AdminPedidos },
+  { path: '/pedidos', name: 'AdminPedidos', component: AdminPedidos, meta: {requiresAuth: true} },
   { path: '/painelempresa', name: 'PainelEmpresa', component: PainelEmpresa, meta: { requiresAuth: true } },
-  { path: '/usuariosview', name: 'Usuarios', component: UsuariosView}
+  { path: '/usuariosview', name: 'Usuarios', component: UsuariosView, meta: {requiresAuth: true}},
+  { path: '/ofertas', name: 'AdminOfertas', component: AdminOfertas, meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({
