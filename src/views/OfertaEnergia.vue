@@ -44,11 +44,11 @@ export default {
       }
 
       const novaOferta = {
-        nomeFornecedor: user.nome,
+        nome: user.nome,
         email: user.email,
         quantidade: this.oferta.quantidade,
         preco: this.oferta.preco,
-        data: this.oferta.dataDisponivel,
+        dataDisponivel: this.oferta.dataDisponivel,
         contratada: false
       };
 
