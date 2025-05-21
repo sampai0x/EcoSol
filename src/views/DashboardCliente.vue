@@ -20,6 +20,17 @@
         <form @submit.prevent="fazerPedido" class="pedido-form">
           <label for="quantidade">Quantidade de energia (kWh):</label>
           <input type="number" id="quantidade" v-model.number="novaQuantidade" min="1" max="50" required />
+
+          <label for="endereco">Selecione o endereço para envio da energia:</label>
+          <select id="endereco" v-model="enderecoSelecionado" required>
+            <option disabled value="">Escolha um endereço</option>
+            <option v-for="(end, idx) in enderecosUsuario" :key="idx" :value="end">
+              {{ end }}
+            </option>
+          </select>
+
+
+
           <button type="submit">Fazer Pedido</button>
         </form>
 
@@ -47,33 +58,50 @@ export default {
   data() {
     return {
       pedidos: [],
-      novaQuantidade: null
+      novaQuantidade: null,
+      enderecoSelecionado: '',
+      enderecosUsuario: [] // Assumindo que você tem isso vindo de algum lugar
     };
   },
   mounted() {
     this.carregarPedidos();
+    this.carregarEnderecos();
   },
   methods: {
     fazerPedido() {
       const limiteMaximo = 50;
+      const totalAtual = this.pedidos.reduce((soma, p) => soma + p.quantidade, 0);
 
-      if (this.novaQuantidade > limiteMaximo) {
-        alert(`O pedido não pode ultrapassar ${limiteMaximo} kWh.`);
+      if (!this.enderecoSelecionado) {
+        alert('Por favor, selecione um endereço.');
+        return;
+      }
+
+      if (this.novaQuantidade + totalAtual > limiteMaximo) {
+        const restante = limiteMaximo - totalAtual;
+        alert(`Você só pode pedir mais ${restante} kWh.`);
         return;
       }
 
       const novoPedido = {
         quantidade: this.novaQuantidade,
-        data: new Date().toLocaleDateString('pt-BR')
+        data: new Date().toLocaleDateString('pt-BR'),
+        endereco: this.enderecoSelecionado
       };
 
       this.pedidos.push(novoPedido);
       localStorage.setItem('pedidosCliente', JSON.stringify(this.pedidos));
+
       this.novaQuantidade = null;
+      this.enderecoSelecionado = '';
     },
     carregarPedidos() {
       const pedidosSalvos = JSON.parse(localStorage.getItem('pedidosCliente') || '[]');
       this.pedidos = pedidosSalvos;
+    },
+    carregarEnderecos() {
+      const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
+      this.enderecosUsuario = usuario?.enderecos || [usuario?.endereco].filter(Boolean);
     },
     logout() {
       localStorage.removeItem('usuarioLogado');
