@@ -2,11 +2,11 @@
   <div class="barra-voltar">
     <div class="logo-titulo">
       <img src="/src/img/EcoSolNavBar.png" alt="Logo" class="logo" />
-      
+
     </div>
     <button @click="voltarDashboard" class="btn-voltar">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left" viewBox="0 0 24 24">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="feather feather-arrow-left" viewBox="0 0 24 24">
         <line x1="19" y1="12" x2="5" y2="12" />
         <polyline points="12 19 5 12 12 5" />
       </svg>
@@ -23,7 +23,10 @@
         <p><strong>E-mail:</strong> {{ perfil.email }}</p>
         <p><strong>Tipo de Conta:</strong> {{ perfil.tipo }}</p>
         <p><strong>CPF/CNPJ:</strong> {{ perfil.cpfCnpj }}</p>
-        <p><strong>Endereço:</strong> {{ perfil.endereco }}</p>
+        <p><strong>Endereços:</strong></p>
+        <ul>
+          <li v-for="(end, index) in perfil.enderecos" :key="index">{{ end }}</li>
+        </ul>
       </div>
       <div v-else>
         <div class="form-group">
@@ -37,8 +40,15 @@
         </div>
 
         <div class="form-group">
-          <label>Endereço:</label>
-          <input type="text" v-model="perfil.endereco" />
+          <label>Endereços:</label>
+          <ul class="lista-enderecos">
+            <li v-for="(end, index) in perfil.enderecos" :key="index">
+              {{ end }}
+              <button @click="removerEndereco(index)" type="button" class="btn-remover">Remover</button>
+            </li>
+          </ul>
+          <input type="text" v-model="novoEndereco" placeholder="Novo endereço" class="input-endereco" />
+          <button @click="adicionarEndereco" type="button" class="btn-adicionar">Adicionar Endereço</button>
         </div>
 
         <div class="form-group readonly">
@@ -70,7 +80,7 @@ const perfil = ref({
   email: '',
   tipo: '',
   cpfCnpj: '',
-  endereco: ''
+  enderecos: []
 })
 
 const originalPerfil = ref({})
@@ -89,7 +99,7 @@ const carregarPerfil = () => {
       email: usuario.email,
       tipo: usuario.tipo,
       cpfCnpj: usuario.cpfCnpj,
-      endereco: usuario.endereco
+      enderecos: usuario.enderecos || (usuario.endereco ? [usuario.endereco] : [])
     }
   }
 }
@@ -97,6 +107,20 @@ const carregarPerfil = () => {
 const editarPerfil = () => {
   originalPerfil.value = { ...perfil.value };
   editando.value = true
+}
+
+const novoEndereco = ref('')
+
+const adicionarEndereco = () => {
+  const endereco = novoEndereco.value.trim()
+  if (endereco && !perfil.value.enderecos.includes(endereco)) {
+    perfil.value.enderecos.push(endereco)
+    novoEndereco.value = ''
+  }
+}
+
+const removerEndereco = (index) => {
+  perfil.value.enderecos.splice(index, 1)
 }
 
 const salvarEdicao = () => {
@@ -206,6 +230,23 @@ h1 {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
+.perfil-card ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.perfil-card ul li {
+  background-color: #fff3e0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 1rem;
+  border: 1px solid #ffd8a8;
+}
+
 .perfil-card p {
   margin: 12px 0;
   font-size: 1.05rem;
@@ -264,4 +305,64 @@ button {
 button:hover {
   background-color: #e67300;
 }
+
+.lista-enderecos {
+  list-style: none;
+  padding: 0;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lista-enderecos li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff3e0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.btn-remover {
+  background-color: #ff0000;
+  color: white;
+  margin-top: 0px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.btn-remover:hover {
+  background-color: #b90303;
+}
+
+.input-endereco {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.btn-adicionar {
+  background-color: #ff8800;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-adicionar:hover {
+  background-color: #e67300;
+}
+
+
 </style>
