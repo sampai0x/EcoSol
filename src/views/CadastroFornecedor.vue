@@ -86,6 +86,7 @@ export default {
     },
     cpfCnpjInvalido() {
       const val = this.form.cpfCnpj.replace(/\D/g, '');
+      if (!this.form.cpfCnpj) return false;
       return !(val.length === 11 || val.length === 14);
     },
     formInvalido() {
@@ -116,7 +117,7 @@ export default {
       usuariosSalvos.push(novoUsuario);
       localStorage.setItem('usuarios', JSON.stringify(usuariosSalvos));
 
-     
+
       localStorage.setItem('usuarioLogado', JSON.stringify(novoUsuario));
 
       this.$router.push('/DashboardFornecedor');

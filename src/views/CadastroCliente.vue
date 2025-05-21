@@ -79,6 +79,7 @@ export default {
     },
     cpfCnpjInvalido() {
       const val = this.form.cpfCnpj.replace(/\D/g, '');
+      if (!this.form.cpfCnpj) return false;
       return !(val.length === 11 || val.length === 14);
     },
     formInvalido() {
