@@ -43,7 +43,7 @@
 
       <div class="form-group">
         <label for="endereco">Endereço:</label>
-        <input type="text" id="endereco" v-model="form.endereco" required />
+        <input type="text" id="endereco" v-model="form.endereco" required placeholder="Digite seu endereço" />
       </div>
 
       <button type="submit" :disabled="formInvalido">Cadastrar</button>
