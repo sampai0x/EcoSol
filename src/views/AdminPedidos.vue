@@ -67,7 +67,6 @@ export default {
       this.$router.push('/painelempresa');
     },
     carregarPedidos() {
-      // Simulação: pede dados do localStorage
       const dados = JSON.parse(localStorage.getItem('pedidosEnergia')) || [];
       this.pedidos = dados;
     },
