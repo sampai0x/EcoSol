@@ -1,124 +1,97 @@
 <template>
-  <div class="admin-dashboard">
-    <nav class="admin-nav">
-      <button @click="voltarPainel">← Voltar ao Painel da Empresa</button>
-    </nav>
+  <nav class="admin-nav">
+    <button @click="voltarPainel">← Voltar ao Painel da Empresa</button>
+  </nav>
+  <div class="admin-pedidos">
+    <h1>Gestão de Pedidos de Energia</h1>
 
-    <section class="admin-content">
-      <h1>Área Administrativa - Gerenciar Pedidos de Energia</h1>
-
-      <section class="admin-requests">
-        <div class="admin-requests-header">
-          <h2>Pedidos de Energia</h2>
-        </div>
-
-        <div v-if="pedidos.length === 0" class="no-requests">
-          Nenhum pedido registrado.
-        </div>
-
-        <ul class="admin-requests-list">
-          <li v-for="(pedido, index) in pedidos" :key="index" class="admin-request-item">
-            <div>
-              <strong>{{ pedido.quantidade }} kWh</strong><br />
-              <span>Data do pedido: {{ pedido.data }}</span>
-            </div>
-            <button @click="removerPedido(index)">Recusar</button>
-          </li>
-        </ul>
-      </section>
-    </section>
-
-    <div v-if="mostrarModal" class="modal">
-      <div class="modal-content">
-        <h3>Novo Pedido de Energia</h3>
-        <label for="quantidade">Quantidade (kWh):</label>
-        <input id="quantidade" type="number" v-model.number="novoPedido.quantidade" min="1" />
-
-        <div class="modal-actions">
-          <button @click="adicionarPedido" :disabled="novoPedido.quantidade <= 0">Adicionar Pedido</button>
-          <button @click="fecharModal">Cancelar</button>
+    <!-- Pedidos Pendentes -->
+    <section class="pedidos-bloco">
+      <h2>Pedidos Pendentes</h2>
+      <div v-if="pedidosPendentes.length" class="card-container">
+        <div v-for="(pedido, index) in pedidosPendentes" :key="index" class="card pedido">
+          <div class="card-header">
+            <h3>{{ pedido.nomeCliente }}</h3>
+            <span class="email">{{ pedido.emailCliente }}</span>
+          </div>
+          <p><strong>{{ pedido.quantidade }} kWh</strong> solicitados</p>
+          <p><span class="label">Data do pedido:</span> {{ pedido.dataPedido }}</p>
+          <div class="card-actions">
+            <button class="confirmar" @click="firmarContrato(pedido.id)">Confirmar Contrato</button>
+            <button class="cancelar" @click="cancelarPedido(pedido.id)">Cancelar Pedido</button>
+          </div>
         </div>
       </div>
-    </div>
+      <p v-else class="mensagem-vazia">Nenhum pedido pendente.</p>
+    </section>
+
+    <!-- Contratos Firmados -->
+    <section class="pedidos-bloco">
+      <h2>Contratos Firmados</h2>
+      <div v-if="contratosFirmados.length" class="card-container">
+        <div v-for="(pedido, index) in contratosFirmados" :key="'c'+index" class="card contrato">
+          <div class="card-header">
+            <h3>{{ pedido.nomeCliente }}</h3>
+            <span class="email">{{ pedido.emailCliente }}</span>
+          </div>
+          <p><strong>{{ pedido.quantidade }} kWh</strong> contratados</p>
+          <p><span class="label">Data do pedido:</span> {{ pedido.dataPedido }}</p>
+          <p class="status">✅ Contrato firmado</p>
+        </div>
+      </div>
+      <p v-else class="mensagem-vazia">Nenhum contrato firmado.</p>
+    </section>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'AdminPedidos',
   data() {
     return {
-      pedidos: [],
-      mostrarModal: false,
-      novoPedido: {
-        quantidade: 0
-      }
+      pedidos: []
+    };
+  },
+  computed: {
+    pedidosPendentes() {
+      return this.pedidos.filter(p => !p.contratoFirmado);
+    },
+    contratosFirmados() {
+      return this.pedidos.filter(p => p.contratoFirmado);
     }
   },
   mounted() {
-    this.verificarAcesso()
-    this.carregarPedidos()
+    this.carregarPedidos();
   },
   methods: {
     voltarPainel() {
       this.$router.push('/painelempresa');
     },
-    verificarAcesso() {
-      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'))
-      if (!usuarioLogado || !usuarioLogado.isAdmin) {
-        alert('Acesso negado: Área administrativa apenas para administradores.')
-        this.$router.push('/')
-      }
-    },
     carregarPedidos() {
-      const pedidosSalvos = JSON.parse(localStorage.getItem('pedidosCliente') || '[]')
-      this.pedidos = pedidosSalvos
+      // Simulação: pede dados do localStorage
+      const dados = JSON.parse(localStorage.getItem('pedidosEnergia')) || [];
+      this.pedidos = dados;
     },
     salvarPedidos() {
-      localStorage.setItem('pedidosCliente', JSON.stringify(this.pedidos))
+      localStorage.setItem('pedidosEnergia', JSON.stringify(this.pedidos));
     },
-    abrirModalNovoPedido() {
-      this.mostrarModal = true
-      this.novoPedido.quantidade = 0
-    },
-    fecharModal() {
-      this.mostrarModal = false
-    },
-    adicionarPedido() {
-      const pedido = {
-        quantidade: this.novoPedido.quantidade,
-        data: new Date().toLocaleDateString()
-      }
-      this.pedidos.push(pedido)
-      this.salvarPedidos()
-      this.fecharModal()
-    },
-    removerPedido(index) {
-      if (confirm('Deseja remover este pedido?')) {
-        this.pedidos.splice(index, 1)
-        this.salvarPedidos()
+    firmarContrato(id) {
+      const pedido = this.pedidos.find(p => p.id === id);
+      if (pedido) {
+        pedido.contratoFirmado = true;
+        this.salvarPedidos();
+        this.carregarPedidos();
       }
     },
-    logout() {
-      localStorage.removeItem('usuarioLogado')
-      this.$router.push('/')
-    },
-    goToHome() {
-      this.$router.push('/')
+    cancelarPedido(id) {
+      this.pedidos = this.pedidos.filter(p => p.id !== id);
+      this.salvarPedidos();
+      this.carregarPedidos();
     }
   }
-}
+};
 </script>
 
 <style scoped>
-.admin-dashboard {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: #fff8f0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
 .admin-nav {
   background-color: #fff8e1;
   padding: 1rem 2rem;
@@ -142,131 +115,123 @@ export default {
   background-color: #e68900;
 }
 
-
-.admin-content {
+.admin-pedidos {
   max-width: 900px;
   margin: 2rem auto;
-  padding: 0 1rem;
-  flex-grow: 1;
-}
-
-.admin-content h1 {
-  font-size: 2rem;
-  color: #cc6600;
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.admin-requests {
-  background: white;
+  background-color: white;
+  font-family: 'Segoe UI', sans-serif;
   padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  color: #333;
+  border-radius: 10px;
 }
 
-.admin-requests-header {
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #2c3e50;
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: #ff8800;
+  margin-bottom: 1rem;
+}
+
+.pedidos-bloco {
+  margin-bottom: 3rem;
+}
+
+.card-container {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.2rem 1.5rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.admin-requests-header h2 {
-  font-size: 1.4rem;
-  color: #ff8800;
+.card-header h3 {
+  font-size: 1.2rem;
+  margin: 0;
+  color: #333;
 }
 
-.admin-requests-header button {
-  background-color: #ff8800;
-  color: white;
-  border: none;
-  padding: 0.6rem 1rem;
+.email {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.label {
+  font-weight: bold;
+  color: #555;
+}
+
+.card-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+button {
+  padding: 0.5rem 0.9rem;
   border-radius: 8px;
   font-weight: bold;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
 }
 
-.admin-requests-header button:hover {
-  background-color: #e67300;
+.confirmar {
+  background-color: #27ae60;
+  color: white;
 }
 
-.no-requests {
-  text-align: center;
-  color: #999;
-  font-style: italic;
-  padding: 1rem;
+.confirmar:hover {
+  background-color: #1e8449;
 }
 
-.admin-requests-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.admin-request-item {
-  background: #fff3e6;
-  border: 1px solid #ffddaa;
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.admin-request-item strong {
-  font-size: 1.2rem;
-  color: #cc6600;
-}
-
-.admin-request-item span {
-  color: #777;
-}
-
-.admin-request-item button {
+.cancelar {
   background-color: #e74c3c;
   color: white;
-  border: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-weight: bold;
-  transition: background-color 0.3s;
-  cursor: pointer;
 }
 
-.admin-request-item button:hover {
+.cancelar:hover {
   background-color: #c0392b;
 }
 
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
+.contrato {
+  background-color: #ecfdf5;
+  border: 1px solid #b2f2bb;
 }
 
-.modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 320px;
-  width: 90%;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.status {
+  margin-top: 0.8rem;
+  font-weight: bold;
+  color: #27ae60;
 }
 
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
+.mensagem-vazia {
+  color: #999;
+  font-style: italic;
+  margin-top: 1rem;
 }
 </style>
