@@ -93,12 +93,16 @@ const voltarDashboard = () => {
 const carregarPerfil = () => {
   const usuario = JSON.parse(localStorage.getItem('usuarioLogado'))
   if (usuario) {
+    let enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
+    // filtra os endereços deste usuário
+    enderecos = enderecos.filter(e => e.emailUsuario === usuario.email)
+
     perfil.value = {
       nome: usuario.nome,
       email: usuario.email,
       tipo: usuario.tipo,
       cpfCnpj: usuario.cpfCnpj,
-      enderecos: usuario.enderecos || (usuario.endereco ? [usuario.endereco] : [])
+      enderecos: usuario.enderecos || []
     }
   }
 }
@@ -126,16 +130,16 @@ const adicionarEndereco = () => {
     perfil.value.enderecos.push(novoEndObj)
     novoEndereco.value = ''
 
-    let enderecosPendentes = JSON.parse(localStorage.getItem('enderecosPendentes')) || []
+    let enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
 
-    const jaExiste = enderecosPendentes.some(e =>
+    const jaExiste = enderecos.some(e =>
       e.texto.toLowerCase() === enderecoTexto.toLowerCase() &&
       e.emailUsuario === perfil.value.email
     )
 
     if (!jaExiste) {
-      enderecosPendentes.push(novoEndObj)
-      localStorage.setItem('enderecosPendentes', JSON.stringify(enderecosPendentes))
+      enderecos.push(novoEndObj)
+      localStorage.setItem('enderecos', JSON.stringify(enderecos))
     }
   }
 }
@@ -146,13 +150,13 @@ const removerEndereco = (index) => {
   const enderecoRemovido = perfil.value.enderecos.splice(index, 1)[0]
 
   if (enderecoRemovido) {
-    let enderecosPendentes = JSON.parse(localStorage.getItem('enderecosPendentes')) || []
+    let enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
 
-    enderecosPendentes = enderecosPendentes.filter(e =>
+    enderecos = enderecos.filter(e =>
       !(e.id === enderecoRemovido.id && e.emailUsuario === perfil.value.email)
     )
 
-    localStorage.setItem('enderecosPendentes', JSON.stringify(enderecosPendentes))
+    localStorage.setItem('enderecos', JSON.stringify(enderecos))
   }
 }
 

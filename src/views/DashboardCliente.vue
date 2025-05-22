@@ -24,7 +24,7 @@
           <label for="endereco">Selecione o endereço para envio da energia:</label>
           <select id="endereco" v-model="enderecoSelecionado" required>
             <option disabled value="">Escolha um endereço</option>
-            <option v-for="(end, idx) in enderecosUsuario" :key="idx" :value="end">
+            <option v-for="(end, idx) in enderecos" :key="idx" :value="end">
               {{ end }}
             </option>
           </select>
@@ -68,15 +68,37 @@ export default {
     return {
       pedidos: [],
       novaQuantidade: null,
+      enderecos: [],
       enderecoSelecionado: '',
-      enderecosUsuario: [],
     };
   },
-  mounted() {
+  async mounted() {
     this.carregarPedidos();
     this.carregarEnderecos();
   },
   methods: {
+    carregarEnderecos() {
+      const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
+      if (!usuario || !usuario.email) {
+        console.error('Usuário não logado');
+        this.enderecos = [];
+        return;
+      }
+
+      const enderecosString = localStorage.getItem('enderecos');
+      if (!enderecosString) {
+        console.error('Endereços não encontrados no localStorage');
+        this.enderecos = [];
+        return;
+      }
+
+      const enderecos = JSON.parse(enderecosString);
+      this.enderecos = enderecos
+        .filter(e => e.validado === true && e.emailUsuario === usuario.email)
+        .map(e => e.texto);
+
+      console.log('Endereços validados carregados:', this.enderecos);
+    },
     fazerPedido() {
       const limiteMaximo = 50;
       const totalAtual = this.pedidos.reduce((soma, p) => soma + p.quantidade, 0);
@@ -113,16 +135,6 @@ export default {
     carregarPedidos() {
       const pedidosSalvos = JSON.parse(localStorage.getItem('pedidosEnergia') || '[]');
       this.pedidos = pedidosSalvos;
-    },
-    carregarEnderecos() {
-      const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
-      if (usuario?.enderecos) {
-        this.enderecosUsuario = usuario.enderecos
-          .filter(e => e.validado === true)
-          .map(e => e.texto);
-      } else {
-        this.enderecosUsuario = [];
-      }
     },
     cancelarPedido(index) {
       if (confirm('Tem certeza que deseja cancelar este pedido?')) {

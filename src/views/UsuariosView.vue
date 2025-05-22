@@ -62,7 +62,7 @@
           <tbody>
             <tr v-for="endereco in enderecosPendentes" :key="endereco.id">
               <td>{{ endereco.texto }}</td>
-              <td>{{ getClienteNome(endereco.clienteEmail) }}</td>
+              <td>{{ getClienteNome(endereco.emailUsuario) }}</td>
               <td>
                 <button class="aprovar-btn" @click="aprovarEndereco(endereco.id)">Aprovar</button>
                 <button class="rejeitar-btn" @click="rejeitarEndereco(endereco.id)">Rejeitar</button>
@@ -101,16 +101,13 @@ function getClienteNome(email) {
 
 function aprovarEndereco(id) {
   // Pega os endereços pendentes do localStorage
-  const enderecosPendentesStorage = JSON.parse(localStorage.getItem('enderecosPendentes')) || []
+  const enderecosPendentesStorage = JSON.parse(localStorage.getItem('enderecos')) || []
 
   // Atualiza o endereço com status 'aprovado'
   const idx = enderecosPendentesStorage.findIndex(e => e.id === id)
   if (idx !== -1) {
     enderecosPendentesStorage[idx].status = 'aprovado'
     enderecosPendentesStorage[idx].validado = true
-
-    // Atualiza localStorage dos pendentes
-    localStorage.setItem('enderecosPendentes', JSON.stringify(enderecosPendentesStorage))
 
     // Também atualiza o localStorage 'enderecos' se precisar
     const enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
@@ -139,16 +136,11 @@ function aprovarEndereco(id) {
 
 
 function rejeitarEndereco(id) {
-  // Remove do 'enderecosPendentes'
-  let enderecosPendentesStorage = JSON.parse(localStorage.getItem('enderecosPendentes')) || []
-  const enderecoRemover = enderecosPendentesStorage.find(e => e.id === id)
-  enderecosPendentesStorage = enderecosPendentesStorage.filter(e => e.id !== id)
-  localStorage.setItem('enderecosPendentes', JSON.stringify(enderecosPendentesStorage))
+  const enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
+  const enderecoRemover = enderecos.find(e => e.id === id)
+  const novosEnderecos = enderecos.filter(e => e.id !== id)
+  localStorage.setItem('enderecos', JSON.stringify(novosEnderecos))
 
-  // Remove também do 'enderecos'
-  let enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
-  enderecos = enderecos.filter(e => e.id !== id)
-  localStorage.setItem('enderecos', JSON.stringify(enderecos))
 
   // Remove do usuário
   if (enderecoRemover) {
@@ -170,16 +162,15 @@ function carregarEnderecosPendentes() {
   clientes.value = usuarios.filter(u => u.tipo === 'Cliente')
   fornecedores.value = usuarios.filter(u => u.tipo === 'Fornecedor')
 
-  // Usa 'enderecos' e filtra os pendentes
-  const enderecos = JSON.parse(localStorage.getItem('enderecosPendentes')) || []
+  const enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
   enderecosPendentes.value = enderecos.filter(e => !e.validado)
-
 
   console.log('Endereços pendentes:', enderecosPendentes.value)
 }
 
 onMounted(() => {
   carregarEnderecosPendentes()
+  localStorage.removeItem('enderecosPendentes')
 
   setTimeout(() => {
     console.log('Clientes:', clientes.value)

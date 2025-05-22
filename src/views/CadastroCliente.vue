@@ -5,7 +5,7 @@
         <div class="logo">
           <img src="/src/img/EcoSolNavBar.png" alt="Logo" class="logo-img" />
         </div>
-        <button class="voltar" @click="goTohome()">← Voltar para Home</button>
+        <button class="voltar" @click="goTohome">← Voltar para Home</button>
       </div>
     </nav>
     <form @submit.prevent="enviarFormulario">
@@ -35,8 +35,7 @@
 
       <div class="form-group">
         <label for="confirmarSenha">Confirmar Senha:</label>
-        <input type="password" id="confirmarSenha" v-model="form.confirmarSenha" required
-          placeholder="Digite sua senha" />
+        <input type="password" id="confirmarSenha" v-model="form.confirmarSenha" required placeholder="Digite sua senha" />
         <span v-if="senhasDiferentes" class="erro">As senhas não coincidem</span>
       </div>
 
@@ -52,81 +51,83 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'CadastroCliente',
-  data() {
-    return {
-      form: {
-        nome: '',
-        email: '',
-        senha: '',
-        confirmarSenha: '',
-        endereco: '',
-        tipo: '',
-        cpfCnpj: ''
-      },
-      mensagem: ''
-    };
-  },
-  computed: {
-    emailInvalido() {
-      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return this.form.email && !regex.test(this.form.email);
-    },
-    senhasDiferentes() {
-      return this.form.senha && this.form.confirmarSenha && this.form.senha !== this.form.confirmarSenha;
-    },
-    cpfCnpjInvalido() {
-      const val = this.form.cpfCnpj.replace(/\D/g, '');
-      if (!this.form.cpfCnpj) return false;
-      return !(val.length === 11 || val.length === 14);
-    },
-    formInvalido() {
-      return this.emailInvalido || this.senhasDiferentes || this.cpfCnpjInvalido;
-    }
-  },
-  methods: {
-    goTohome() {
-      this.$router.push('/');
-    },
-    enviarFormulario() {
-      if (this.formInvalido) return;
+<script setup>
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 
-      const usuariosSalvos = JSON.parse(localStorage.getItem('usuarios') || '[]');
-      const enderecosPendentes = JSON.parse(localStorage.getItem('enderecosPendentes') || '[]');
+const router = useRouter()
 
-      const jaExiste = usuariosSalvos.some(u => u.email === this.form.email);
-      if (jaExiste) {
-        alert('Este e-mail já está cadastrado.');
-        return;
-      }
+const form = ref({
+  nome: '',
+  email: '',
+  senha: '',
+  confirmarSenha: '',
+  endereco: '',
+  cpfCnpj: ''
+})
 
-      const novoEndereco = { texto: this.form.endereco, validado: false, emailUsuario: this.form.email };
+const mensagem = ref('')
 
-      const novoUsuario = {
-        nome: this.form.nome,
-        email: this.form.email,
-        senha: this.form.senha,
-        tipo: 'Cliente',
-        cpfCnpj: this.form.cpfCnpj,
-        enderecos: [novoEndereco]
-      };
+const emailInvalido = computed(() => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return form.value.email && !regex.test(form.value.email)
+})
 
-      usuariosSalvos.push(novoUsuario);
-      enderecosPendentes.push(novoEndereco);
+const senhasDiferentes = computed(() => {
+  return form.value.senha && form.value.confirmarSenha && form.value.senha !== form.value.confirmarSenha
+})
 
-      localStorage.setItem('usuarios', JSON.stringify(usuariosSalvos));
-      localStorage.setItem('enderecosPendentes', JSON.stringify(enderecosPendentes));
-      localStorage.setItem('usuarioLogado', JSON.stringify(novoUsuario));
+const cpfCnpjInvalido = computed(() => {
+  const val = form.value.cpfCnpj.replace(/\D/g, '')
+  if (!form.value.cpfCnpj) return false
+  return !(val.length === 11 || val.length === 14)
+})
 
-      this.$router.push('/DashboardCliente');
-    }
+const formInvalido = computed(() => {
+  return emailInvalido.value || senhasDiferentes.value || cpfCnpjInvalido.value
+})
+
+function goTohome() {
+  router.push('/')
+}
+
+function enviarFormulario() {
+  if (formInvalido.value) return
+
+  const usuariosSalvos = JSON.parse(localStorage.getItem('usuarios') || '[]')
+
+  const jaExiste = usuariosSalvos.some(u => u.email === form.value.email)
+  if (jaExiste) {
+    alert('Este e-mail já está cadastrado.')
+    return
   }
-};
+
+  const novoEndereco = { texto: form.value.endereco, validado: false, emailUsuario: form.value.email }
+
+  const novoUsuario = {
+    nome: form.value.nome,
+    email: form.value.email,
+    senha: form.value.senha,
+    tipo: 'Cliente',
+    cpfCnpj: form.value.cpfCnpj,
+    enderecos: [novoEndereco]
+  }
+
+  usuariosSalvos.push(novoUsuario)
+  localStorage.setItem('usuarios', JSON.stringify(usuariosSalvos))
+  localStorage.setItem('usuarioLogado', JSON.stringify(novoUsuario))
+
+  const enderecoPrimario = JSON.parse(localStorage.getItem('enderecos') || '[]')
+  enderecoPrimario.push(novoEndereco)
+  localStorage.setItem('enderecos', JSON.stringify(enderecoPrimario))
+
+  router.push('/DashboardCliente')
+}
+
 </script>
 
 <style scoped>
+/* seu CSS permanece igual */
 .navbar {
   width: 100%;
   background-color: #ffffff;
@@ -163,7 +164,6 @@ export default {
   height: 40px;
   margin-right: 10px;
 }
-
 
 .voltar {
   background-color: #ff8800;
