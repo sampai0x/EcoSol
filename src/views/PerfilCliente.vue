@@ -2,7 +2,6 @@
   <div class="barra-voltar">
     <div class="logo-titulo">
       <img src="/src/img/EcoSolNavBar.png" alt="Logo" class="logo" />
-
     </div>
     <button @click="voltarDashboard" class="btn-voltar">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -25,7 +24,7 @@
         <p><strong>CPF/CNPJ:</strong> {{ perfil.cpfCnpj }}</p>
         <p><strong>Endereços:</strong></p>
         <ul>
-          <li v-for="(end, index) in perfil.enderecos" :key="index">{{ end }}</li>
+          <li v-for="(end, index) in perfil.enderecos" :key="index">{{ end.texto }}</li>
         </ul>
       </div>
       <div v-else>
@@ -43,7 +42,7 @@
           <label>Endereços:</label>
           <ul class="lista-enderecos">
             <li v-for="(end, index) in perfil.enderecos" :key="index">
-              {{ end }}
+              {{ end.texto }}
               <button @click="removerEndereco(index)" type="button" class="btn-remover">Remover</button>
             </li>
           </ul>
@@ -105,27 +104,61 @@ const carregarPerfil = () => {
 }
 
 const editarPerfil = () => {
-  originalPerfil.value = { ...perfil.value };
+  originalPerfil.value = JSON.parse(JSON.stringify(perfil.value))
   editando.value = true
 }
 
 const novoEndereco = ref('')
 
 const adicionarEndereco = () => {
-  const endereco = novoEndereco.value.trim()
-  if (endereco && !perfil.value.enderecos.includes(endereco)) {
-    perfil.value.enderecos.push(endereco)
+  const enderecoTexto = novoEndereco.value.trim()
+  if (
+    enderecoTexto &&
+    !perfil.value.enderecos.some(e => e.texto.toLowerCase() === enderecoTexto.toLowerCase())
+  ) {
+    const novoEndObj = {
+      id: Date.now().toString(),
+      texto: enderecoTexto,
+      validado: false,
+      emailUsuario: perfil.value.email
+    }
+
+    perfil.value.enderecos.push(novoEndObj)
     novoEndereco.value = ''
+
+    let enderecosPendentes = JSON.parse(localStorage.getItem('enderecosPendentes')) || []
+
+    const jaExiste = enderecosPendentes.some(e =>
+      e.texto.toLowerCase() === enderecoTexto.toLowerCase() &&
+      e.emailUsuario === perfil.value.email
+    )
+
+    if (!jaExiste) {
+      enderecosPendentes.push(novoEndObj)
+      localStorage.setItem('enderecosPendentes', JSON.stringify(enderecosPendentes))
+    }
   }
 }
 
+
+
 const removerEndereco = (index) => {
-  perfil.value.enderecos.splice(index, 1)
+  const enderecoRemovido = perfil.value.enderecos.splice(index, 1)[0]
+
+  if (enderecoRemovido) {
+    let enderecosPendentes = JSON.parse(localStorage.getItem('enderecosPendentes')) || []
+
+    enderecosPendentes = enderecosPendentes.filter(e =>
+      !(e.id === enderecoRemovido.id && e.emailUsuario === perfil.value.email)
+    )
+
+    localStorage.setItem('enderecosPendentes', JSON.stringify(enderecosPendentes))
+  }
 }
+
 
 const salvarEdicao = () => {
   localStorage.setItem('usuarioLogado', JSON.stringify(perfil.value))
-
 
   const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]')
   const index = usuarios.findIndex(u => u.email === originalPerfil.value.email)
@@ -139,10 +172,9 @@ const salvarEdicao = () => {
 }
 
 const cancelarEdicao = () => {
-  perfil.value = { ...originalPerfil.value }
+  perfil.value = JSON.parse(JSON.stringify(originalPerfil.value))
   editando.value = false
 }
-
 
 onMounted(() => {
   carregarPerfil()
@@ -363,6 +395,4 @@ button:hover {
 .btn-adicionar:hover {
   background-color: #e67300;
 }
-
-
 </style>

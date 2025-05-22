@@ -42,16 +42,12 @@
             <div>
               <strong>{{ pedido.quantidade }} kWh</strong><br />
               <span>Data do pedido: {{ pedido.dataPedido }}</span><br />
-              <span>Endereço: {{ pedido.endereco }}</span>
+              <span>Endereço: {{ pedido.enderecos }}</span>
             </div>
 
             <div>
-              <button
-                v-if="!pedido.contratoFirmado"
-                @click="cancelarPedido(index)"
-                class="cancelar-pedido-btn"
-                type="button"
-              >
+              <button v-if="!pedido.contratoFirmado" @click="cancelarPedido(index)" class="cancelar-pedido-btn"
+                type="button">
                 Cancelar Pedido
               </button>
               <span v-else class="contrato-ativo">
@@ -73,7 +69,7 @@ export default {
       pedidos: [],
       novaQuantidade: null,
       enderecoSelecionado: '',
-      enderecosUsuario: [], 
+      enderecosUsuario: [],
     };
   },
   mounted() {
@@ -104,7 +100,7 @@ export default {
         emailCliente: usuario.email || '',
         quantidade: this.novaQuantidade,
         dataPedido: new Date().toLocaleDateString('pt-BR'),
-        endereco: this.enderecoSelecionado,
+        enderecos: this.enderecoSelecionado,
         contratoFirmado: false,
       };
 
@@ -120,7 +116,13 @@ export default {
     },
     carregarEnderecos() {
       const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
-      this.enderecosUsuario = usuario?.enderecos || [usuario?.endereco].filter(Boolean);
+      if (usuario?.enderecos) {
+        this.enderecosUsuario = usuario.enderecos
+          .filter(e => e.validado === true)
+          .map(e => e.texto);
+      } else {
+        this.enderecosUsuario = [];
+      }
     },
     cancelarPedido(index) {
       if (confirm('Tem certeza que deseja cancelar este pedido?')) {

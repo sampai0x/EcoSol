@@ -84,14 +84,14 @@
       </div>
     </section>
     <!-- footer -->
-      <footer class="footer">
-        <div class="footer-content" id="foot">
-          <p><strong>Contato:</strong></p>
-          <p>Email: contato@ecosol.com</p>
-          <p>Telefone: (11) 99999-9999</p>
-          <p>Endereço: Rua da Energia, 123 - Sustentável, SP</p>
-        </div>
-      </footer>
+    <footer class="footer">
+      <div class="footer-content" id="foot">
+        <p><strong>Contato:</strong></p>
+        <p>Email: contato@ecosol.com</p>
+        <p>Telefone: (11) 99999-9999</p>
+        <p>Endereço: Rua da Energia, 123 - Sustentável, SP</p>
+      </div>
+    </footer>
   </body>
 </template>
 
@@ -124,14 +124,15 @@ export default {
       const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
 
       const usuarioValido = usuarios.find(usuario =>
-        usuario.email === this.email && usuario.senha === this.senha
+        usuario.email === this.email
       );
+
+      console.log("Usuario válido encontrado?", usuarioValido);
 
       if (usuarioValido) {
         localStorage.setItem('usuarioLogado', JSON.stringify(usuarioValido));
         this.isLoggedIn = true;
         this.usuario = usuarioValido;
-
 
         this.goToDashboard();
       } else {
@@ -612,17 +613,17 @@ export default {
 /* footer */
 
 .footer {
-  background-color: #ffffff; 
+  background-color: #ffffff;
   padding: 2rem;
   text-align: center;
-  border-top: 2px solid #f59e0b; 
+  border-top: 2px solid #f59e0b;
   margin-top: 4rem;
-  
+
 }
 
 .footer p,
 .footer a {
-  color: #92400e; 
+  color: #92400e;
   font-weight: 500;
   font-size: 1.05rem;
   text-decoration: none;

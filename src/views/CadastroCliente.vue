@@ -42,7 +42,7 @@
 
       <div class="form-group">
         <label for="endereco">Endereço:</label>
-        <input type="text" id="endereco" v-model="form.endereco" required placeholder="Digite seu endereço"/>
+        <input type="text" id="endereco" v-model="form.endereco" required placeholder="Digite seu endereço" />
       </div>
 
       <button type="submit" :disabled="formInvalido">Cadastrar</button>
@@ -94,6 +94,7 @@ export default {
       if (this.formInvalido) return;
 
       const usuariosSalvos = JSON.parse(localStorage.getItem('usuarios') || '[]');
+      const enderecosPendentes = JSON.parse(localStorage.getItem('enderecosPendentes') || '[]');
 
       const jaExiste = usuariosSalvos.some(u => u.email === this.form.email);
       if (jaExiste) {
@@ -101,24 +102,26 @@ export default {
         return;
       }
 
+      const novoEndereco = { texto: this.form.endereco, validado: false, emailUsuario: this.form.email };
+
       const novoUsuario = {
         nome: this.form.nome,
         email: this.form.email,
         senha: this.form.senha,
         tipo: 'Cliente',
         cpfCnpj: this.form.cpfCnpj,
-        endereco: this.form.endereco
+        enderecos: [novoEndereco]
       };
 
       usuariosSalvos.push(novoUsuario);
+      enderecosPendentes.push(novoEndereco);
+
       localStorage.setItem('usuarios', JSON.stringify(usuariosSalvos));
-
-
+      localStorage.setItem('enderecosPendentes', JSON.stringify(enderecosPendentes));
       localStorage.setItem('usuarioLogado', JSON.stringify(novoUsuario));
 
       this.$router.push('/DashboardCliente');
     }
-
   }
 };
 </script>
