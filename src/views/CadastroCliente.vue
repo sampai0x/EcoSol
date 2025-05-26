@@ -41,7 +41,7 @@
 
       <div class="form-group">
         <label for="endereco">Endereço:</label>
-        <input type="text" id="endereco" v-model="form.endereco" required placeholder="Digite seu endereço" />
+        <input type="text" id="endereco" v-model="form.endereco" required placeholder="Ex: (Rua Tal, 34 - Bairro do Sol, Leme/SP)" />
       </div>
 
       <button type="submit" :disabled="formInvalido">Cadastrar</button>

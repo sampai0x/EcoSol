@@ -54,15 +54,15 @@
           <i class="fas fa-leaf fa-2x" style="color:#16a34a;"></i>
           <h1>Sobre o Projeto</h1>
           <p>
-            Somos uma empresa com um projeto que propõe o desenvolvimento de uma plataforma digital para gerenciamento
-            de energia renovável...
+            Somos uma coorporativa com o intuito de conectar clientes que desejam adquirir energia limpa mais barata e
+            fornecedores dispostos a vender no atacado.
           </p>
         </div>
         <div>
           <i class="fas fa-solar-panel fa-2x" style="color:#f59e0b;"></i>
           <h1>Compartilhe Energia Solar</h1>
           <p>
-            Conecte-se com outras pessoas para fornecer ou receber energia solar de forma simples e colaborativa.
+            Conecte-se com a gente para fornecer ou receber energia solar de forma simples e colaborativa.
           </p>
         </div>
       </div>
