@@ -161,7 +161,6 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f9f9f9;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -208,7 +207,7 @@ export default {
 
 .dashboard-content h1 {
   font-size: 2rem;
-  color: #333;
+  color: #ff8800;
   text-align: center;
   margin-bottom: 2rem;
 }
