@@ -1,6 +1,7 @@
 body {
-    background-color: #fde68a; 
+    background: linear-gradient(to bottom, #fef3c7, #fde68a);
+    background-repeat: no-repeat;
+    min-height: 100vh;
     margin: 0;
     font-family: 'Poppins', sans-serif;
 }
-  
