@@ -108,6 +108,7 @@ const originalPerfil = ref({})
 const editando = ref(false)
 const router = useRouter()
 const comprovante = ref(null)
+const comprovanteRequisitado = ref(false)
 
 
 function handleFileUpload(event) {
@@ -214,6 +215,7 @@ const removerEndereco = (index) => {
 
 
 const salvarEdicao = () => {
+  console.log("Botão salvar clicado");
   const enderecoOriginal = originalPerfil.value.enderecos[0]?.texto?.trim() || ''
   const enderecoAtual = perfil.value.enderecos[0]?.texto?.trim() || ''
 
@@ -226,6 +228,7 @@ const salvarEdicao = () => {
 
   if (enderecoAlterado && comprovante.value) {
     perfil.value.enderecos[0].comprovante = comprovante.value
+    perfil.value.enderecos[0].validado = false 
 
     let enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
 
@@ -242,6 +245,7 @@ const salvarEdicao = () => {
 
     localStorage.setItem('enderecos', JSON.stringify(enderecos))
   }
+
 
 
   localStorage.setItem('usuarioLogado', JSON.stringify(perfil.value))
