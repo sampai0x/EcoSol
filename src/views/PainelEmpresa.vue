@@ -35,8 +35,8 @@
         <Line :data="chartData" />
       </div>
       <div class="grafico">
-        <h2>Saldo Financeiro da Empresa (R$)</h2>
-        <Line :data="chartFinanceiro" />
+        <h2>Saldo da Empresa (R$)</h2>
+        <Line :data="chartFinanceiroData" :options="chartFinanceiroOptions" />
       </div>
     </div>
 
@@ -154,14 +154,9 @@ export default {
         ]
       };
     },
-    chartFinanceiro() {
+    chartFinanceiroData() {
       const lucroPorKWh = 2;
       const energiaPorMes = {};
-
-      const ofertasRaw = JSON.parse(localStorage.getItem('ofertasEnergia') || '{}');
-      const ofertasArray = Object.values(ofertasRaw);
-
-      const pedidosArray = JSON.parse(localStorage.getItem('pedidosEnergia') || '[]');
 
       function parseData(dataStr) {
         const partes = dataStr.split('/');
@@ -171,28 +166,40 @@ export default {
         return new Date(dataStr);
       }
 
-      // Agrupar por mês
+      // Coletando e agrupando energia ofertada por mês
+      const ofertasRaw = JSON.parse(localStorage.getItem('ofertasEnergia') || '{}');
+      const ofertasArray = Object.values(ofertasRaw);
+
       ofertasArray.forEach(oferta => {
         const data = parseData(oferta.dataDisponivel);
         if (isNaN(data.getTime())) return;
+
         const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`;
+        const qtd = Number(oferta.quantidade) || 0;
         energiaPorMes[chave] = energiaPorMes[chave] || { ofertado: 0, pedido: 0 };
-        energiaPorMes[chave].ofertado += Number(oferta.quantidade) || 0;
+        energiaPorMes[chave].ofertado += qtd;
       });
+
+      // Coletando e agrupando energia pedida por mês
+      const pedidosArray = JSON.parse(localStorage.getItem('pedidosEnergia') || '[]');
 
       pedidosArray.forEach(pedido => {
         const data = parseData(pedido.dataPedido);
         if (isNaN(data.getTime())) return;
+
         const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`;
+        const qtd = Number(pedido.quantidade) || 0;
         energiaPorMes[chave] = energiaPorMes[chave] || { ofertado: 0, pedido: 0 };
-        energiaPorMes[chave].pedido += Number(pedido.quantidade) || 0;
+        energiaPorMes[chave].pedido += qtd;
       });
 
+      // Preparando dados ordenados
       const datasOrdenadas = Object.keys(energiaPorMes).sort();
+      const formatador = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' });
 
       const labels = datasOrdenadas.map(dataStr => {
         const data = new Date(dataStr);
-        return new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' }).format(data);
+        return formatador.format(data);
       });
 
       const valoresR$ = [];
@@ -209,6 +216,9 @@ export default {
         energiaDetalhada.push({ ofertado, pedido, utilizado, saldoEnergia });
       });
 
+      // Armazenando para tooltip
+      this.energiaDetalhadaFinanceira = energiaDetalhada;
+
       return {
         labels,
         datasets: [
@@ -219,7 +229,7 @@ export default {
             data: valoresR$,
             fill: true,
             tension: 0.3,
-            yAxisID: 'y' // Eixo financeiro
+            yAxisID: 'y'
           },
           {
             label: 'Saldo de Energia (kWh)',
@@ -228,53 +238,9 @@ export default {
             data: saldosEnergia,
             fill: false,
             tension: 0.3,
-            yAxisID: 'y1' // Eixo de energia
+            yAxisID: 'y1'
           }
-        ],
-        options: {
-          responsive: true,
-          interaction: {
-            mode: 'index',
-            intersect: false
-          },
-          scales: {
-            y: {
-              type: 'linear',
-              position: 'left',
-              title: {
-                display: true,
-                text: 'Saldo (R$)'
-              }
-            },
-            y1: {
-              type: 'linear',
-              position: 'right',
-              grid: {
-                drawOnChartArea: false
-              },
-              title: {
-                display: true,
-                text: 'Energia (kWh)'
-              }
-            }
-          },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                afterLabel: function (context) {
-                  const index = context.dataIndex;
-                  const energia = energiaDetalhada[index];
-                  return [
-                    `Ofertado: ${energia.ofertado} kWh`,
-                    `Pedido: ${energia.pedido} kWh`,
-                    `Utilizado: ${energia.utilizado} kWh`,
-                    `Saldo de energia: ${energia.saldoEnergia} kWh`
-                  ];
-                }
-              }
-            }
-          }
-        }
+        ]
       };
     }
   }
