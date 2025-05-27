@@ -1,4 +1,12 @@
 <template>
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="logo">
+        <img src="/src/img/EcoSolNavBar.png" alt="Logo" class="logo-img" />
+      </div>
+      <button class="voltar" @click="goTohome">← Voltar para Home</button>
+    </div>
+  </nav>
   <div class="painel-empresa">
     <div class="header">
       <h1>Painel Administrativo</h1>
@@ -21,10 +29,17 @@
         <p>Consulte clientes e fornecedores registrados.</p>
       </div>
     </div>
-    <div style="max-width: 600px; margin: 2rem auto;">
-      <h2 style="text-align: center; color: #92400e;">Histórico de Pedidos de Energia</h2>
-      <Line :data="chartData" />
+    <div class="graficos">
+      <div class="grafico">
+        <h2>Histórico de Pedidos de Energia</h2>
+        <Line :data="chartData" />
+      </div>
+      <div class="grafico">
+        <h2>Saldo Financeiro da Empresa (R$)</h2>
+        <Line :data="chartFinanceiro" />
+      </div>
     </div>
+
   </div>
 </template>
 
@@ -59,16 +74,18 @@ export default {
   },
   methods: {
     carregarPedidos() {
-      const pedidosSalvos = JSON.parse(localStorage.getItem('pedidosCliente') || '[]');
+      const pedidosSalvos = JSON.parse(localStorage.getItem('pedidosEnergia') || '[]');
       this.pedidos = pedidosSalvos;
     },
     irParaPedidos() { this.$router.push('/pedidos'); },
     irParaOfertas() { this.$router.push('/ofertas'); },
     irParaUsuarios() { this.$router.push('/usuariosview'); },
+    goTohome() { this.$router.push('/') }
   },
   computed: {
     chartData() {
-      const energiaPorMes = {};
+      const energiaClientes = {};
+      const energiaFornecedores = {};
 
       function parseData(dataStr) {
         const partes = dataStr.split('/');
@@ -78,47 +95,244 @@ export default {
         return new Date(dataStr);
       }
 
+      // Agrupando pedidos por mês
       this.pedidos.forEach(pedido => {
-        const data = parseData(pedido.data);
-        if (isNaN(data.getTime())) return; // ignora datas inválidas
+        const data = parseData(pedido.dataPedido);
+        if (isNaN(data.getTime())) return;
 
-        const mesAnoChave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`;
-        const quantidade = Number(pedido.quantidade) || 0;
-
-        energiaPorMes[mesAnoChave] = (energiaPorMes[mesAnoChave] || 0) + quantidade;
+        const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`;
+        const qtd = Number(pedido.quantidade) || 0;
+        energiaClientes[chave] = (energiaClientes[chave] || 0) + qtd;
       });
 
-      const datasOrdenadas = Object.keys(energiaPorMes).sort();
+      // Agrupando ofertas por mês
+      const ofertasRaw = JSON.parse(localStorage.getItem('ofertasEnergia') || '{}');
+      const ofertasArray = Object.values(ofertasRaw);
 
-      const formatadorData = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' });
+      ofertasArray.forEach(oferta => {
+        const data = parseData(oferta.dataDisponivel);
+        if (isNaN(data.getTime())) return;
+
+        const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`;
+        const qtd = Number(oferta.quantidade) || 0;
+        energiaFornecedores[chave] = (energiaFornecedores[chave] || 0) + qtd;
+      });
+
+      // Unificar todas as datas
+      const todasDatas = new Set([...Object.keys(energiaClientes), ...Object.keys(energiaFornecedores)]);
+      const datasOrdenadas = Array.from(todasDatas).sort();
+
+      const formatador = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' });
 
       const labels = datasOrdenadas.map(dataStr => {
         const data = new Date(dataStr);
-        return formatadorData.format(data);
+        return formatador.format(data);
       });
 
-      const dados = datasOrdenadas.map(dataStr => energiaPorMes[dataStr]);
+      const dadosClientes = datasOrdenadas.map(d => energiaClientes[d] || 0);
+      const dadosFornecedores = datasOrdenadas.map(d => energiaFornecedores[d] || 0);
 
       return {
         labels,
         datasets: [
           {
-            label: 'Energia Solicitada por Mês (kWh)',
-            backgroundColor: '#f97316',
+            label: 'Energia Solicitada pelos Clientes (kWh)',
             borderColor: '#f97316',
-            data: dados,
+            backgroundColor: '#f97316',
+            data: dadosClientes,
+            fill: false,
+            tension: 0.3
+          },
+          {
+            label: 'Energia Oferecida pelos Fornecedores (kWh)',
+            borderColor: '#10b981',
+            backgroundColor: '#10b981',
+            data: dadosFornecedores,
             fill: false,
             tension: 0.3
           }
         ]
       };
+    },
+    chartFinanceiro() {
+      const lucroPorKWh = 2;
+      const energiaPorMes = {};
+
+      const ofertasRaw = JSON.parse(localStorage.getItem('ofertasEnergia') || '{}');
+      const ofertasArray = Object.values(ofertasRaw);
+
+      const pedidosArray = JSON.parse(localStorage.getItem('pedidosEnergia') || '[]');
+
+      function parseData(dataStr) {
+        const partes = dataStr.split('/');
+        if (partes.length === 3) {
+          return new Date(`${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`);
+        }
+        return new Date(dataStr);
+      }
+
+      // Agrupar por mês
+      ofertasArray.forEach(oferta => {
+        const data = parseData(oferta.dataDisponivel);
+        if (isNaN(data.getTime())) return;
+        const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`;
+        energiaPorMes[chave] = energiaPorMes[chave] || { ofertado: 0, pedido: 0 };
+        energiaPorMes[chave].ofertado += Number(oferta.quantidade) || 0;
+      });
+
+      pedidosArray.forEach(pedido => {
+        const data = parseData(pedido.dataPedido);
+        if (isNaN(data.getTime())) return;
+        const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`;
+        energiaPorMes[chave] = energiaPorMes[chave] || { ofertado: 0, pedido: 0 };
+        energiaPorMes[chave].pedido += Number(pedido.quantidade) || 0;
+      });
+
+      const datasOrdenadas = Object.keys(energiaPorMes).sort();
+
+      const labels = datasOrdenadas.map(dataStr => {
+        const data = new Date(dataStr);
+        return new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' }).format(data);
+      });
+
+      const valoresR$ = [];
+      const saldosEnergia = [];
+      const energiaDetalhada = [];
+
+      datasOrdenadas.forEach(dataStr => {
+        const { ofertado, pedido } = energiaPorMes[dataStr];
+        const utilizado = Math.min(ofertado, pedido);
+        const saldoEnergia = ofertado - pedido;
+
+        valoresR$.push(utilizado * lucroPorKWh);
+        saldosEnergia.push(saldoEnergia);
+        energiaDetalhada.push({ ofertado, pedido, utilizado, saldoEnergia });
+      });
+
+      return {
+        labels,
+        datasets: [
+          {
+            label: 'Saldo (R$)',
+            borderColor: '#2563eb',
+            backgroundColor: '#93c5fd',
+            data: valoresR$,
+            fill: true,
+            tension: 0.3,
+            yAxisID: 'y' // Eixo financeiro
+          },
+          {
+            label: 'Saldo de Energia (kWh)',
+            borderColor: '#f97316',
+            backgroundColor: '#fdba74',
+            data: saldosEnergia,
+            fill: false,
+            tension: 0.3,
+            yAxisID: 'y1' // Eixo de energia
+          }
+        ],
+        options: {
+          responsive: true,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          scales: {
+            y: {
+              type: 'linear',
+              position: 'left',
+              title: {
+                display: true,
+                text: 'Saldo (R$)'
+              }
+            },
+            y1: {
+              type: 'linear',
+              position: 'right',
+              grid: {
+                drawOnChartArea: false
+              },
+              title: {
+                display: true,
+                text: 'Energia (kWh)'
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                afterLabel: function (context) {
+                  const index = context.dataIndex;
+                  const energia = energiaDetalhada[index];
+                  return [
+                    `Ofertado: ${energia.ofertado} kWh`,
+                    `Pedido: ${energia.pedido} kWh`,
+                    `Utilizado: ${energia.utilizado} kWh`,
+                    `Saldo de energia: ${energia.saldoEnergia} kWh`
+                  ];
+                }
+              }
+            }
+          }
+        }
+      };
     }
   }
-
 }
 </script>
 
 <style scoped>
+.navbar {
+  width: 100%;
+  background-color: #ffffff;
+  padding: 1rem 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.logo-img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+.voltar {
+  background-color: #ff8800;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.voltar:hover {
+  background-color: #d97706;
+}
+
 .painel-empresa {
   padding: 2rem;
   max-width: 1000px;
@@ -129,6 +343,7 @@ export default {
 }
 
 .header {
+  margin-top: 80px;
   text-align: center;
   margin-bottom: 2rem;
 }
@@ -176,5 +391,29 @@ export default {
   background-color: #fef3c7;
   transform: translateY(-4px);
   box-shadow: 0 10px 16px rgba(0, 0, 0, 0.12);
+}
+
+.graficos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.grafico {
+  flex: 1 1 400px;
+  max-width: 600px;
+  margin-top: 50px;
+  background: white;
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.grafico h2 {
+  text-align: center;
+  color: #92400e;
+  margin-bottom: 1rem;
 }
 </style>
