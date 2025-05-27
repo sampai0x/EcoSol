@@ -39,15 +39,37 @@
         </div>
 
         <div class="form-group">
-          <label>Endereços:</label>
+          <label>Endereço Principal:</label>
+          <div class="endereco-principal">
+            <input v-if="editando" v-model="perfil.enderecos[0].texto" @input="comprovanteRequisitado = true"
+              class="input-endereco" />
+            <span v-else>{{ perfil.enderecos[0]?.texto || 'Nenhum endereço cadastrado' }}</span>
+          </div>
+          <input v-if="editando" type="file" @change="handleFileUpload" accept=".pdf,image/*"
+            class="input-comprovante" />
+          <p v-if="comprovanteRequisitado && comprovante">
+            Arquivo selecionado: {{ comprovante.nome }}
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>Endereços Secundários:</label>
           <ul class="lista-enderecos">
-            <li v-for="(end, index) in perfil.enderecos" :key="index">
-              {{ end.texto }}
-              <button @click="removerEndereco(index)" type="button" class="btn-remover">Remover</button>
+            <li v-for="(end, index) in perfil.enderecos.slice(1)" :key="end.id">
+              <div>{{ end.texto }}</div>
+              <button v-if="editando" @click="removerEndereco(index + 1)" type="button"
+                class="btn-remover">Remover</button>
             </li>
           </ul>
-          <input type="text" v-model="novoEndereco" placeholder="Novo endereço" class="input-endereco" />
-          <button @click="adicionarEndereco" type="button" class="btn-adicionar">Adicionar Endereço</button>
+          <input v-if="editando" type="text" v-model="novoEndereco" placeholder="Novo endereço"
+            class="input-endereco" />
+          <input v-if="editando" type="file" @change="handleFileUpload" accept=".pdf,image/*"
+            class="input-comprovante" />
+          <p v-if="comprovante && !comprovanteRequisitado">
+            Arquivo selecionado: {{ comprovante.nome }}
+          </p>
+          <button v-if="editando" @click="adicionarEndereco" type="button" class="btn-adicionar">Adicionar
+            Endereço</button>
         </div>
 
         <div class="form-group readonly">
@@ -85,6 +107,26 @@ const perfil = ref({
 const originalPerfil = ref({})
 const editando = ref(false)
 const router = useRouter()
+const comprovante = ref(null)
+
+
+function handleFileUpload(event) {
+  const file = event.target.files[0]
+  if (file && file.type === "application/pdf") {
+    const reader = new FileReader()
+    reader.onload = function (e) {
+      comprovante.value = {
+        nome: file.name,
+        conteudo: e.target.result
+      }
+    }
+    reader.readAsDataURL(file)
+  } else {
+    alert("Por favor, envie um arquivo PDF válido.")
+    event.target.value = null
+    comprovante.value = null
+  }
+}
 
 const voltarDashboard = () => {
   router.push('/DashboardCliente')
@@ -120,11 +162,19 @@ const adicionarEndereco = () => {
     enderecoTexto &&
     !perfil.value.enderecos.some(e => e.texto.toLowerCase() === enderecoTexto.toLowerCase())
   ) {
+
+    if (!comprovante.value) {
+      alert('Por favor, envie um comprovante antes de adicionar o endereço.')
+      return
+    }
+
+
     const novoEndObj = {
       id: Date.now().toString(),
       texto: enderecoTexto,
       validado: false,
-      emailUsuario: perfil.value.email
+      emailUsuario: perfil.value.email,
+      comprovante: comprovante.value
     }
 
     perfil.value.enderecos.push(novoEndObj)
@@ -140,9 +190,11 @@ const adicionarEndereco = () => {
     if (!jaExiste) {
       enderecos.push(novoEndObj)
       localStorage.setItem('enderecos', JSON.stringify(enderecos))
+      comprovante.value = null
     }
   }
 }
+
 
 
 
@@ -162,6 +214,36 @@ const removerEndereco = (index) => {
 
 
 const salvarEdicao = () => {
+  const enderecoOriginal = originalPerfil.value.enderecos[0]?.texto?.trim() || ''
+  const enderecoAtual = perfil.value.enderecos[0]?.texto?.trim() || ''
+
+  const enderecoAlterado = enderecoOriginal !== enderecoAtual
+
+  if (enderecoAlterado && !comprovante.value) {
+    alert('Você alterou o endereço principal. Envie um comprovante antes de salvar.')
+    return
+  }
+
+  if (enderecoAlterado && comprovante.value) {
+    perfil.value.enderecos[0].comprovante = comprovante.value
+
+    let enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
+
+    const indexExistente = enderecos.findIndex(e =>
+      e.id === perfil.value.enderecos[0].id &&
+      e.emailUsuario === perfil.value.email
+    )
+
+    if (indexExistente !== -1) {
+      enderecos[indexExistente] = perfil.value.enderecos[0]
+    } else {
+      enderecos.push(perfil.value.enderecos[0])
+    }
+
+    localStorage.setItem('enderecos', JSON.stringify(enderecos))
+  }
+
+
   localStorage.setItem('usuarioLogado', JSON.stringify(perfil.value))
 
   const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]')
@@ -173,6 +255,7 @@ const salvarEdicao = () => {
   }
 
   editando.value = false
+  comprovante.value = null
 }
 
 const cancelarEdicao = () => {
@@ -342,6 +425,27 @@ button:hover {
   background-color: #e67300;
 }
 
+.endereco-principal {
+  display: flex;
+  background-color: #fff3e0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #ffd8a8;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.endereco-principal input {
+  width: 100%;
+  max-width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+
+
 .lista-enderecos {
   list-style: none;
   padding: 0;
@@ -377,12 +481,31 @@ button:hover {
   background-color: #b90303;
 }
 
-.input-endereco {
+.input-comprovante {
+  display: flex;
   padding: 0.6rem;
   border: 1px solid #ccc;
   border-radius: 8px;
-  width: 100%;
   margin-bottom: 0.5rem;
+  background-color: #fff;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.input-comprovante::file-selector-button {
+  background-color: #ff8800;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-right: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.input-comprovante::file-selector-button:hover {
+  background-color: #e67300;
 }
 
 .btn-adicionar {

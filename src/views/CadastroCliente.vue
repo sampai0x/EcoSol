@@ -35,13 +35,20 @@
 
       <div class="form-group">
         <label for="confirmarSenha">Confirmar Senha:</label>
-        <input type="password" id="confirmarSenha" v-model="form.confirmarSenha" required placeholder="Digite sua senha" />
+        <input type="password" id="confirmarSenha" v-model="form.confirmarSenha" required
+          placeholder="Digite sua senha" />
         <span v-if="senhasDiferentes" class="erro">As senhas não coincidem</span>
       </div>
 
       <div class="form-group">
         <label for="endereco">Endereço:</label>
-        <input type="text" id="endereco" v-model="form.endereco" required placeholder="Ex: (Rua Tal, 34 - Bairro do Sol, Leme/SP)" />
+        <input type="text" id="endereco" v-model="form.endereco" required
+          placeholder="Ex: (Rua Tal, 34 - Bairro do Sol, Leme/SP)" />
+      </div>
+
+      <div class="form-group">
+        <label for="comprovante">Comprovante de Endereço (PDF ou imagem):</label>
+        <input type="file" id="comprovante" @change="handleFileUpload" accept=".pdf,image/*" />
       </div>
 
       <button type="submit" :disabled="formInvalido">Cadastrar</button>
@@ -87,6 +94,24 @@ const formInvalido = computed(() => {
   return emailInvalido.value || senhasDiferentes.value || cpfCnpjInvalido.value
 })
 
+const comprovante = ref(null)
+
+function handleFileUpload(event) {
+  const file = event.target.files[0]
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = () => {
+      comprovante.value = {
+        nome: file.name,
+        tipo: file.type,
+        base64: reader.result
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+
 function goTohome() {
   router.push('/')
 }
@@ -102,7 +127,12 @@ function enviarFormulario() {
     return
   }
 
-  const novoEndereco = { texto: form.value.endereco, validado: false, emailUsuario: form.value.email }
+  const novoEndereco = {
+    texto: form.value.endereco,
+    validado: false,
+    emailUsuario: form.value.email,
+    comprovante: comprovante.value || null
+  }
 
   const novoUsuario = {
     nome: form.value.nome,
@@ -123,6 +153,7 @@ function enviarFormulario() {
 
   router.push('/DashboardCliente')
 }
+
 
 </script>
 

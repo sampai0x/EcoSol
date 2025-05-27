@@ -55,6 +55,7 @@
           <thead>
             <tr>
               <th>Rua / Logradouro</th>
+              <th>Comprovante</th>
               <th>Cliente</th>
               <th>Ações</th>
             </tr>
@@ -62,6 +63,13 @@
           <tbody>
             <tr v-for="endereco in enderecosPendentes" :key="endereco.id">
               <td>{{ endereco.texto }}</td>
+              <td>
+                <a v-if="endereco.comprovante && endereco.comprovante.conteudo" :href="endereco.comprovante.conteudo"
+                  :download="endereco.comprovante.nome" class="comprovante-btn">
+                  Baixar
+                </a>
+                <span v-else style="color: gray;">Não enviado</span>
+              </td>
               <td>{{ getClienteNome(endereco.emailUsuario) }}</td>
               <td>
                 <button class="aprovar-btn" @click="aprovarEndereco(endereco.id)">Aprovar</button>
