@@ -184,6 +184,7 @@ onMounted(() => {
 .perfil-fornecedor {
   max-width: 700px;
   margin: 40px auto;
+  margin-bottom: 140px;
   padding: 20px;
   background-color: #fff8e7;
   border-radius: 16px;
