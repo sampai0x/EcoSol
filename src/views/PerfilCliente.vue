@@ -56,21 +56,19 @@
           <label>Endereços Secundários:</label>
           <ul class="lista-enderecos">
             <li v-for="(end, index) in perfil.enderecos.slice(1)" :key="end.id">
-              <div>{{ end.texto }}</div>
-
-              <span v-if="end.validado === true" style="color: green; font-weight: bold;">
-                (Endereço validado)
-              </span>
-
-              <span v-else-if="end.validado === false" style="color: red; font-weight: bold;">
-                (Endereço recusado)
-              </span>
-
-              <span v-else style="color: gray;">
-                (Aguardando validação)
-              </span>
-            <button v-if="editando" @click="removerEndereco(index + 1)" type="button"
-              class="btn-remover">Remover</button>
+              <div class="endereco-status">
+                <div>{{ end.texto }}</div>
+                <div class="status-container">
+                  <span v-if="end.validado === true" class="validado">
+                    Validado
+                  </span>
+                  <span v-else-if="end.validado === false" class="recusado">
+                    Recusado/Aguardando validação
+                  </span>
+                </div>
+              </div>
+              <button v-if="editando" @click="removerEndereco(index + 1)" type="button"
+                class="btn-remover">Remover</button>
             </li>
           </ul>
           <input v-if="editando" type="text" v-model="novoEndereco" placeholder="Novo endereço"
@@ -157,7 +155,7 @@ const carregarPerfil = () => {
       email: usuario.email,
       tipo: usuario.tipo,
       cpfCnpj: usuario.cpfCnpj,
-      enderecos: usuario.enderecos || []
+      enderecos: enderecos
     }
   }
 }
@@ -342,7 +340,7 @@ onMounted(() => {
 }
 
 .perfil-fornecedor {
-  max-width: 700px;
+  max-width: 1000px;
   margin: 40px auto;
   padding: 20px;
   background-color: #fff8e7;
@@ -424,6 +422,30 @@ h1 {
   gap: 1rem;
 }
 
+.status-container {
+  white-space: nowrap; 
+}
+
+.validado,
+.recusado {
+  background-color: green;
+  color: white;
+  padding: 5px 8px;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+
+.validado {
+  background-color: green;
+}
+
+
+.recusado {
+  background-color: red;
+}
+
 button {
   background-color: #ff8800;
   color: white;
@@ -482,6 +504,13 @@ button:hover {
   border-radius: 8px;
   margin-bottom: 8px;
   font-size: 1rem;
+}
+
+.endereco-status {
+  display: flex;
+  gap: 12px; 
+  align-items: center;
+  flex-grow: 1; 
 }
 
 .btn-remover {
