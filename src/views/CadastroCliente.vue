@@ -48,7 +48,7 @@
 
       <div class="form-group">
         <label for="comprovante">Comprovante de Endereço (PDF ou imagem):</label>
-        <input type="file" id="comprovante" @change="handleFileUpload" accept=".pdf,image/*" />
+        <input type="file" id="comprovante" @change="handleFileUpload" accept=".pdf,image/*" required/>
       </div>
 
       <button type="submit" :disabled="formInvalido">Cadastrar</button>
@@ -100,11 +100,10 @@ function handleFileUpload(event) {
   const file = event.target.files[0]
   if (file) {
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.onload = function (e) {
       comprovante.value = {
         nome: file.name,
-        tipo: file.type,
-        base64: reader.result
+        conteudo: e.target.result
       }
     }
     reader.readAsDataURL(file)

@@ -57,8 +57,20 @@
           <ul class="lista-enderecos">
             <li v-for="(end, index) in perfil.enderecos.slice(1)" :key="end.id">
               <div>{{ end.texto }}</div>
-              <button v-if="editando" @click="removerEndereco(index + 1)" type="button"
-                class="btn-remover">Remover</button>
+
+              <span v-if="end.validado === true" style="color: green; font-weight: bold;">
+                (Endereço validado)
+              </span>
+
+              <span v-else-if="end.validado === false" style="color: red; font-weight: bold;">
+                (Endereço recusado)
+              </span>
+
+              <span v-else style="color: gray;">
+                (Aguardando validação)
+              </span>
+            <button v-if="editando" @click="removerEndereco(index + 1)" type="button"
+              class="btn-remover">Remover</button>
             </li>
           </ul>
           <input v-if="editando" type="text" v-model="novoEndereco" placeholder="Novo endereço"
@@ -228,7 +240,7 @@ const salvarEdicao = () => {
 
   if (enderecoAlterado && comprovante.value) {
     perfil.value.enderecos[0].comprovante = comprovante.value
-    perfil.value.enderecos[0].validado = false 
+    perfil.value.enderecos[0].validado = false
 
     let enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
 
@@ -269,6 +281,7 @@ const cancelarEdicao = () => {
 
 onMounted(() => {
   carregarPerfil()
+
 })
 </script>
 
