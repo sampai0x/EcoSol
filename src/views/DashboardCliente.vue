@@ -133,8 +133,15 @@ export default {
       this.enderecoSelecionado = '';
     },
     carregarPedidos() {
+      const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
+      if (!usuario || !usuario.email) {
+        console.error('Usuário não logado');
+        this.pedidos = [];
+        return;
+      }
+
       const pedidosSalvos = JSON.parse(localStorage.getItem('pedidosEnergia') || '[]');
-      this.pedidos = pedidosSalvos;
+      this.pedidos = pedidosSalvos.filter(p => p.emailCliente === usuario.email);
     },
     cancelarPedido(index) {
       if (confirm('Tem certeza que deseja cancelar este pedido?')) {
