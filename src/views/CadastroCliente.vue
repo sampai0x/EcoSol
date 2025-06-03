@@ -127,6 +127,7 @@ function enviarFormulario() {
   }
 
   const novoEndereco = {
+    id: Date.now().toString(),
     texto: form.value.endereco,
     validado: false,
     emailUsuario: form.value.email,
