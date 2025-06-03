@@ -126,9 +126,19 @@ export default {
         contratoFirmado: false,
       };
 
-      this.pedidos.push(novoPedido);
-      localStorage.setItem('pedidosEnergia', JSON.stringify(this.pedidos));
+      // 🔥 Carrega todos os pedidos existentes
+      const todosPedidos = JSON.parse(localStorage.getItem('pedidosEnergia') || '[]');
 
+      // 🔥 Adiciona o novo
+      todosPedidos.push(novoPedido);
+
+      // 🔥 Salva tudo de volta
+      localStorage.setItem('pedidosEnergia', JSON.stringify(todosPedidos));
+
+      // Atualiza apenas os pedidos do usuário logado
+      this.carregarPedidos();
+
+      // Limpa o form
       this.novaQuantidade = null;
       this.enderecoSelecionado = '';
     },
@@ -145,8 +155,18 @@ export default {
     },
     cancelarPedido(index) {
       if (confirm('Tem certeza que deseja cancelar este pedido?')) {
-        this.pedidos.splice(index, 1);
-        localStorage.setItem('pedidosEnergia', JSON.stringify(this.pedidos));
+        const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
+
+        const todosPedidos = JSON.parse(localStorage.getItem('pedidosEnergia') || '[]');
+
+        // 🗑 Remove o pedido do array global usando o ID
+        const pedidoParaRemover = this.pedidos[index];
+
+        const pedidosAtualizados = todosPedidos.filter(p => p.id !== pedidoParaRemover.id);
+
+        localStorage.setItem('pedidosEnergia', JSON.stringify(pedidosAtualizados));
+
+        this.carregarPedidos(); // Recarrega os do usuário atual
       }
     },
     logout() {
