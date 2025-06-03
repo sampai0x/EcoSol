@@ -1,0 +1,501 @@
+[
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminUsuariosController",
+    "Method": "ListarClientes",
+    "RelativePath": "api/admin/AdminUsuarios/clientes",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminUsuariosController",
+    "Method": "DetalharCliente",
+    "RelativePath": "api/admin/AdminUsuarios/clientes/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminUsuariosController",
+    "Method": "AprovarEndereco",
+    "RelativePath": "api/admin/AdminUsuarios/clientes/{id}/endereco/aprovar",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminUsuariosController",
+    "Method": "RejeitarEndereco",
+    "RelativePath": "api/admin/AdminUsuarios/clientes/{id}/endereco/rejeitar",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.DTOs.Admin.EnderecoRejeicaoDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminUsuariosController",
+    "Method": "ListarFornecedores",
+    "RelativePath": "api/admin/AdminUsuarios/fornecedores",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminUsuariosController",
+    "Method": "DetalharFornecedor",
+    "RelativePath": "api/admin/AdminUsuarios/fornecedores/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminContratosController",
+    "Method": "ListarTodos",
+    "RelativePath": "api/admin/contratos",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminContratosController",
+    "Method": "VerDetalhes",
+    "RelativePath": "api/admin/contratos/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminContratosController",
+    "Method": "AtualizarStatus",
+    "RelativePath": "api/admin/contratos/{id}/status",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.DTOs.Admin.ContratoStatusUpdateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminOfertasController",
+    "Method": "ListarOfertasPendentes",
+    "RelativePath": "api/admin/ofertasenergia",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminPedidosController",
+    "Method": "ListarTodos",
+    "RelativePath": "api/admin/pedidos",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminPedidosController",
+    "Method": "VerDetalhes",
+    "RelativePath": "api/admin/pedidos/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AdminPedidosController",
+    "Method": "AtualizarStatus",
+    "RelativePath": "api/admin/pedidos/{id}/status",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.DTOs.Admin.PedidoStatusUpdateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AuthController",
+    "Method": "GetForbidden",
+    "RelativePath": "api/auth/forbidden",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AuthController",
+    "Method": "LoginAdmin",
+    "RelativePath": "api/auth/login/admin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.Dtos.Auth.LoginRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AuthController",
+    "Method": "LoginCliente",
+    "RelativePath": "api/auth/login/cliente",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.Dtos.Auth.LoginRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AuthController",
+    "Method": "LoginFornecedor",
+    "RelativePath": "api/auth/login/fornecedor",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.Dtos.Auth.LoginRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AuthController",
+    "Method": "Logout",
+    "RelativePath": "api/auth/logout",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.AuthController",
+    "Method": "GetUnauthorized",
+    "RelativePath": "api/auth/unauthorized",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.ClientesController",
+    "Method": "GetPerfil",
+    "RelativePath": "api/Clientes/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.ClientesController",
+    "Method": "AtualizarPerfil",
+    "RelativePath": "api/Clientes/me",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.DTOs.Clientes.ClienteUpdateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.ClientesController",
+    "Method": "CadastrarCliente",
+    "RelativePath": "api/Clientes/me/cadastro/cliente",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.DTOs.Clientes.ClienteCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.ClientesController",
+    "Method": "EnviarComprovante",
+    "RelativePath": "api/Clientes/me/endereco/comprovante",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Arquivo",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.DashboardController",
+    "Method": "GetClienteDashboard",
+    "RelativePath": "api/Dashboard/cliente",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.DashboardController",
+    "Method": "GetPedidosClienteChart",
+    "RelativePath": "api/Dashboard/dashboard/cliente/grafico",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.DashboardController",
+    "Method": "GetPainelEmpresa",
+    "RelativePath": "api/Dashboard/dashboard/empresa/stats",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.DashboardController",
+    "Method": "GetContratosFornecedorChart",
+    "RelativePath": "api/Dashboard/dashboard/fornecedor/grafico",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.DashboardController",
+    "Method": "GetFornecedorDashboard",
+    "RelativePath": "api/Dashboard/fornecedor",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.FornecedoresController",
+    "Method": "CadastrarFornecedor",
+    "RelativePath": "api/Fornecedores",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.DTOs.Fornecedores.FornecedorCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.FornecedoresController",
+    "Method": "GetPerfil",
+    "RelativePath": "api/Fornecedores/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.FornecedoresController",
+    "Method": "AtualizarPerfil",
+    "RelativePath": "api/Fornecedores/me",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.DTOs.Fornecedores.FornecedorUpdateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.FornecedoresContratosController",
+    "Method": "CriarContrato",
+    "RelativePath": "api/fornecedores/me/contratos",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.DTOs.Contratos.ContratoFornecedorCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.FornecedoresContratosController",
+    "Method": "ListarContratos",
+    "RelativePath": "api/fornecedores/me/contratos",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.FornecedoresContratosController",
+    "Method": "ObterContrato",
+    "RelativePath": "api/fornecedores/me/contratos/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.HomeController",
+    "Method": "GetStats",
+    "RelativePath": "api/Home/stats",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.PedidosController",
+    "Method": "CriarPedido",
+    "RelativePath": "api/Pedidos",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ECOSOL.API.DTOs.Pedidos.PedidoCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ECOSOL.API.Controllers.PedidosController",
+    "Method": "ListarMeusPedidos",
+    "RelativePath": "api/Pedidos/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]

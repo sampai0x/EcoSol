@@ -1,0 +1,125 @@
+{
+  "Version": 1,
+  "Hash": "H59rUdv6coLKcI8IeRIwvjEH/n5+G8GeUy5DQ+frT/A=",
+  "Source": "ECOSOL.API",
+  "BasePath": "_content/ECOSOL.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "ECOSOL.API\\wwwroot",
+      "Source": "ECOSOL.API",
+      "ContentRoot": "C:\\Users\\Teste\\Desktop\\Projeto_PA\\ECOSOL.API\\wwwroot\\",
+      "BasePath": "_content/ECOSOL.API",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\Teste\\Desktop\\Projeto_PA\\ECOSOL.API\\wwwroot\\uploads\\comprovantes\\cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg",
+      "SourceId": "ECOSOL.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Teste\\Desktop\\Projeto_PA\\ECOSOL.API\\wwwroot\\",
+      "BasePath": "_content/ECOSOL.API",
+      "RelativePath": "uploads/comprovantes/cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04#[.{fingerprint}]?.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "r23sd8i0xt",
+      "Integrity": "k2v6gjRQ0ME2U3PGmmYKcsdQgkTIdqRkyDSgvIudbwQ=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\comprovantes\\cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "uploads/comprovantes/cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg",
+      "AssetFile": "C:\\Users\\Teste\\Desktop\\Projeto_PA\\ECOSOL.API\\wwwroot\\uploads\\comprovantes\\cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3024233"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"k2v6gjRQ0ME2U3PGmmYKcsdQgkTIdqRkyDSgvIudbwQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 03:02:29 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-k2v6gjRQ0ME2U3PGmmYKcsdQgkTIdqRkyDSgvIudbwQ="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/comprovantes/cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.r23sd8i0xt.jpg",
+      "AssetFile": "C:\\Users\\Teste\\Desktop\\Projeto_PA\\ECOSOL.API\\wwwroot\\uploads\\comprovantes\\cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3024233"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"k2v6gjRQ0ME2U3PGmmYKcsdQgkTIdqRkyDSgvIudbwQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 02 Jun 2025 03:02:29 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "r23sd8i0xt"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/comprovantes/cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-k2v6gjRQ0ME2U3PGmmYKcsdQgkTIdqRkyDSgvIudbwQ="
+        }
+      ]
+    }
+  ]
+}
