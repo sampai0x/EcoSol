@@ -108,39 +108,39 @@ function getClienteNome(email) {
 
 
 function aprovarEndereco(id) {
-  // Pega os endereços pendentes do localStorage
-  const enderecosPendentesStorage = JSON.parse(localStorage.getItem('enderecos')) || []
+  const enderecos = JSON.parse(localStorage.getItem('enderecos')) || [];
+  const idx = enderecos.findIndex(e => e.id === id);
 
-  // Atualiza o endereço com status 'aprovado'
-  const idx = enderecosPendentesStorage.findIndex(e => e.id === id)
-  if (idx !== -1) {
-    enderecosPendentesStorage[idx].status = 'aprovado'
-    enderecosPendentesStorage[idx].validado = true
+  if (idx === -1) return;
 
-    // Também atualiza o localStorage 'enderecos' se precisar
-    const enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
-    const idxGlobal = enderecos.findIndex(e => e.id === id)
-    if (idxGlobal !== -1) {
-      enderecos[idxGlobal].status = 'aprovado'
-      enderecos[idxGlobal].validado = true
-      localStorage.setItem('enderecos', JSON.stringify(enderecos))
+  // Atualiza o endereço
+  enderecos[idx].status = 'aprovado';
+  enderecos[idx].validado = true;
+
+  // Salva no localStorage
+  localStorage.setItem('enderecos', JSON.stringify(enderecos));
+
+  // Atualiza também no usuário correspondente
+  const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+  const usuarioIdx = usuarios.findIndex(u => u.email === enderecos[idx].emailUsuario);
+
+  if (usuarioIdx !== -1) {
+    const usuario = usuarios[usuarioIdx];
+    const enderecoUsuarioIdx = usuario.enderecos.findIndex(e => e.id === id);
+    if (enderecoUsuarioIdx !== -1) {
+      usuario.enderecos[enderecoUsuarioIdx].validado = true;
+      usuario.enderecos[enderecoUsuarioIdx].status = 'aprovado';
     }
 
-    // Atualiza o usuário também
-    const usuarios = JSON.parse(localStorage.getItem('usuarios')) || []
-    const usuarioIdx = usuarios.findIndex(u => u.email === enderecosPendentesStorage[idx].clienteEmail)
-    if (usuarioIdx !== -1) {
-      const usuario = usuarios[usuarioIdx]
-      const enderecoUsuario = usuario.enderecos.find(e => e.id === id)
-      if (enderecoUsuario) enderecoUsuario.validado = true
-
-      usuarios[usuarioIdx] = usuario
-      localStorage.setItem('usuarios', JSON.stringify(usuarios))
-    }
-
-    carregarEnderecosPendentes()
+    usuarios[usuarioIdx] = usuario;
+    localStorage.setItem('usuarios', JSON.stringify(usuarios));
   }
+
+  // Atualiza a lista reativa
+  carregarEnderecosPendentes();
 }
+
+
 
 
 function rejeitarEndereco(id) {
