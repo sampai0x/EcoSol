@@ -1,0 +1,16 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/ECOSOL.API/uploads/comprovantes/cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\comprovantes\cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-k2v6gjRQ0ME2U3PGmmYKcsdQgkTIdqRkyDSgvIudbwQ="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"3024233"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022k2v6gjRQ0ME2U3PGmmYKcsdQgkTIdqRkyDSgvIudbwQ=\u0022"},{"Name":"Last-Modified","Value":"Mon, 02 Jun 2025 03:02:29 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/ECOSOL.API/uploads/comprovantes/cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.r23sd8i0xt.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\comprovantes\cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"r23sd8i0xt"},{"Name":"integrity","Value":"sha256-k2v6gjRQ0ME2U3PGmmYKcsdQgkTIdqRkyDSgvIudbwQ="},{"Name":"label","Value":"_content/ECOSOL.API/uploads/comprovantes/cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"3024233"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022k2v6gjRQ0ME2U3PGmmYKcsdQgkTIdqRkyDSgvIudbwQ=\u0022"},{"Name":"Last-Modified","Value":"Mon, 02 Jun 2025 03:02:29 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+  </ItemGroup>
+</Project>

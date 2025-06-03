@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\Teste\\Desktop\\Projeto_PA\\ECOSOL.API\\wwwroot\\uploads\\comprovantes\\cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg",
+      "PackagePath": "staticwebassets\\uploads\\comprovantes\\cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.ECOSOL.API.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.ECOSOL.API.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.build.ECOSOL.API.props",
+      "PackagePath": "build\\ECOSOL.API.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.buildMultiTargeting.ECOSOL.API.props",
+      "PackagePath": "buildMultiTargeting\\ECOSOL.API.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.buildTransitive.ECOSOL.API.props",
+      "PackagePath": "buildTransitive\\ECOSOL.API.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
