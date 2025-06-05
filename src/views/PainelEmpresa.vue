@@ -13,38 +13,76 @@
       <p class="subtitulo">Bem-vindo, administrador da EcoSol</p>
     </div>
 
-    <div class="cards">
-      <div class="card" @click="irParaPedidos">
-        <h2>Pedidos de Energia</h2>
-        <p>Visualize e gerencie os pedidos dos clientes.</p>
-      </div>
-
-      <div class="card" @click="irParaOfertas">
-        <h2>Ofertas de Fornecedores</h2>
-        <p>Veja as ofertas disponíveis de cada fornecedor.</p>
-      </div>
-
-      <div class="card" @click="irParaUsuarios">
-        <h2>Usuários Cadastrados</h2>
-        <p>Consulte clientes e fornecedores registrados.</p>
-      </div>
-    </div>
-    <div class="graficos">
-      <div class="grafico">
-        <h2>Histórico de Pedidos de Energia</h2>
-        <Line :data="chartData" />
-      </div>
-      <div class="grafico">
-        <h2>Saldo da Empresa (R$)</h2>
-        <Line :data="chartFinanceiroData" :options="chartFinanceiroOptions" />
-      </div>
+    <div v-if="loading" class="loading">
+      Carregando dados...
     </div>
 
+    <div v-else>
+      <div class="stats-cards" v-if="stats">
+        <div class="stat-card">
+          <h3>{{ stats.totalClientes || 0 }}</h3>
+          <p>Clientes</p>
+        </div>
+        <div class="stat-card">
+          <h3>{{ stats.totalFornecedores || 0 }}</h3>
+          <p>Fornecedores</p>
+        </div>
+        <div class="stat-card">
+          <h3>{{ stats.totalContratos || 0 }}</h3>
+          <p>Contratos</p>
+        </div>
+        <div class="stat-card saldo-card">
+          <h3>{{ formatSaldoResumido(stats.saldo || 0) }}</h3>
+          <p>Saldo</p>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card" @click="irParaPedidos">
+          <h2>Pedidos de Energia</h2>
+          <p>Visualize e gerencie os pedidos dos clientes.</p>
+          <span class="card-count" v-if="stats?.totalPedidos">{{ stats.totalPedidos }} pedidos</span>
+        </div>
+
+        <div class="card" @click="irParaOfertas">
+          <h2>Ofertas de Fornecedores</h2>
+          <p>Veja as ofertas disponíveis de cada fornecedor.</p>
+          <span class="card-count" v-if="stats?.totalContratos">{{ stats.totalContratos }} contratos</span>
+        </div>
+
+        <div class="card" @click="irParaUsuarios">
+          <h2>Usuários Cadastrados</h2>
+          <p>Consulte clientes e fornecedores registrados.</p>
+          <span class="card-count" v-if="stats">{{ stats.totalClientes + stats.totalFornecedores }} usuários</span>
+        </div>
+      </div>
+
+      <div class="graficos">
+        <div class="grafico">
+          <Bar 
+            :data="energiaChartData" 
+            :options="energiaChartOptions"
+            style="height: 300px;"
+          />
+        </div>
+        <div class="grafico">
+          <Bar 
+            :data="saldoChartData" 
+            :options="saldoChartOptions"
+            style="height: 300px;"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div v-if="erro" class="erro-message">{{ erro }}</div>
   </div>
 </template>
 
 <script>
-import { Line } from 'vue-chartjs'
+import { Line, Bar } from 'vue-chartjs'
+import { adminService } from '@/services/admin'
+import { authService } from '@/services/auth'
 
 import {
   Chart as ChartJS,
@@ -52,197 +90,292 @@ import {
   Tooltip,
   Legend,
   LineElement,
+  BarElement,
   PointElement,
   CategoryScale,
   LinearScale
 } from 'chart.js'
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale)
+ChartJS.register(
+  Title, 
+  Tooltip, 
+  Legend, 
+  LineElement, 
+  BarElement,
+  PointElement, 
+  CategoryScale, 
+  LinearScale
+)
 
 export default {
   name: 'PainelEmpresa',
   components: {
-    Line
+    Line,
+    Bar
   },
   data() {
     return {
-      pedidos: [],
+      loading: false,
+      erro: '',
+      stats: null,
     }
   },
-  mounted() {
-    this.carregarPedidos();
-  },
-  methods: {
-    carregarPedidos() {
-      const pedidosSalvos = JSON.parse(localStorage.getItem('pedidosEnergia') || '[]');
-      this.pedidos = pedidosSalvos;
-    },
-    irParaPedidos() { this.$router.push('/pedidos'); },
-    irParaOfertas() { this.$router.push('/ofertas'); },
-    irParaUsuarios() { this.$router.push('/usuariosview'); },
-    goTohome() { this.$router.push('/') }
+  async mounted() {
+    await this.verificarAutenticacao()
+    await this.carregarDados()
   },
   computed: {
-    chartData() {
-      const energiaClientes = {};
-      const energiaFornecedores = {};
-
-      function parseData(dataStr) {
-        const partes = dataStr.split('/');
-        if (partes.length === 3) {
-          return new Date(`${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`);
-        }
-        return new Date(dataStr);
+    energiaChartData() {
+      if (!this.stats) return {
+        labels: [],
+        datasets: []
       }
 
-      // Agrupando pedidos por mês
-      this.pedidos.forEach(pedido => {
-        const data = parseData(pedido.dataPedido);
-        if (isNaN(data.getTime())) return;
-
-        const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`;
-        const qtd = Number(pedido.quantidade) || 0;
-        energiaClientes[chave] = (energiaClientes[chave] || 0) + qtd;
-      });
-
-      // Agrupando ofertas por mês
-      const ofertasRaw = JSON.parse(localStorage.getItem('ofertasEnergia') || '{}');
-      const ofertasArray = Object.values(ofertasRaw);
-
-      ofertasArray.forEach(oferta => {
-        const data = parseData(oferta.dataDisponivel);
-        if (isNaN(data.getTime())) return;
-
-        const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`;
-        const qtd = Number(oferta.quantidade) || 0;
-        energiaFornecedores[chave] = (energiaFornecedores[chave] || 0) + qtd;
-      });
-
-      // Unificar todas as datas
-      const todasDatas = new Set([...Object.keys(energiaClientes), ...Object.keys(energiaFornecedores)]);
-      const datasOrdenadas = Array.from(todasDatas).sort();
-
-      const formatador = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' });
-
-      const labels = datasOrdenadas.map(dataStr => {
-        const data = new Date(dataStr);
-        return formatador.format(data);
-      });
-
-      const dadosClientes = datasOrdenadas.map(d => energiaClientes[d] || 0);
-      const dadosFornecedores = datasOrdenadas.map(d => energiaFornecedores[d] || 0);
-
       return {
-        labels,
+        labels: ['Energia'],
         datasets: [
           {
-            label: 'Energia Solicitada pelos Clientes (kWh)',
-            borderColor: '#f97316',
-            backgroundColor: '#f97316',
-            data: dadosClientes,
-            fill: false,
-            tension: 0.3
+            label: 'Energia Contratada (kWh)',
+            backgroundColor: '#10b981',
+            data: [this.stats.energiaContratada || 0],
+            barPercentage: 0.5
           },
           {
-            label: 'Energia Oferecida pelos Fornecedores (kWh)',
-            borderColor: '#10b981',
-            backgroundColor: '#10b981',
-            data: dadosFornecedores,
-            fill: false,
-            tension: 0.3
+            label: 'Energia Solicitada (kWh)',
+            backgroundColor: '#f97316',
+            data: [this.stats.energiaSolicitada || 0],
+            barPercentage: 0.5
           }
         ]
-      };
+      }
     },
-    chartFinanceiroData() {
-      const lucroPorKWh = 2;
-      const energiaPorMes = {};
-
-      function parseData(dataStr) {
-        const partes = dataStr.split('/');
-        if (partes.length === 3) {
-          return new Date(`${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`);
+    energiaChartOptions() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        scales: {
+          x: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Quantidade (kWh)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              font: {
+                size: 12
+              }
+            }
+          },
+          title: {
+            display: true,
+            text: 'Comparação de Energia',
+            font: {
+              size: 16
+            }
+          }
         }
-        return new Date(dataStr);
+      }
+    },
+    saldoChartData() {
+      if (!this.stats) return {
+        labels: [],
+        datasets: []
       }
 
-      // Coletando e agrupando energia ofertada por mês
-      const ofertasRaw = JSON.parse(localStorage.getItem('ofertasEnergia') || '{}');
-      const ofertasArray = Object.values(ofertasRaw);
-
-      ofertasArray.forEach(oferta => {
-        const data = parseData(oferta.dataDisponivel);
-        if (isNaN(data.getTime())) return;
-
-        const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`;
-        const qtd = Number(oferta.quantidade) || 0;
-        energiaPorMes[chave] = energiaPorMes[chave] || { ofertado: 0, pedido: 0 };
-        energiaPorMes[chave].ofertado += qtd;
-      });
-
-      // Coletando e agrupando energia pedida por mês
-      const pedidosArray = JSON.parse(localStorage.getItem('pedidosEnergia') || '[]');
-
-      pedidosArray.forEach(pedido => {
-        const data = parseData(pedido.dataPedido);
-        if (isNaN(data.getTime())) return;
-
-        const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`;
-        const qtd = Number(pedido.quantidade) || 0;
-        energiaPorMes[chave] = energiaPorMes[chave] || { ofertado: 0, pedido: 0 };
-        energiaPorMes[chave].pedido += qtd;
-      });
-
-      // Preparando dados ordenados
-      const datasOrdenadas = Object.keys(energiaPorMes).sort();
-      const formatador = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' });
-
-      const labels = datasOrdenadas.map(dataStr => {
-        const data = new Date(dataStr);
-        return formatador.format(data);
-      });
-
-      const valoresR$ = [];
-      const saldosEnergia = [];
-      const energiaDetalhada = [];
-
-      datasOrdenadas.forEach(dataStr => {
-        const { ofertado, pedido } = energiaPorMes[dataStr];
-        const utilizado = Math.min(ofertado, pedido);
-        const saldoEnergia = ofertado - pedido;
-
-        valoresR$.push(utilizado * lucroPorKWh);
-        saldosEnergia.push(saldoEnergia);
-        energiaDetalhada.push({ ofertado, pedido, utilizado, saldoEnergia });
-      });
-
-      // Armazenando para tooltip
-      this.energiaDetalhadaFinanceira = energiaDetalhada;
-
       return {
-        labels,
+        labels: ['Valores Atuais'],
         datasets: [
           {
             label: 'Saldo (R$)',
-            borderColor: '#2563eb',
-            backgroundColor: '#93c5fd',
-            data: valoresR$,
-            fill: true,
-            tension: 0.3,
+            backgroundColor: '#2563eb',
+            data: [this.stats.saldo || 0],
+            barPercentage: 0.5,
             yAxisID: 'y'
           },
           {
-            label: 'Saldo de Energia (kWh)',
-            borderColor: '#f97316',
-            backgroundColor: '#fdba74',
-            data: saldosEnergia,
-            fill: false,
-            tension: 0.3,
+            label: 'Banco de Energia (kWh)',
+            backgroundColor: '#f97316',
+            data: [this.stats.bancoEnergia || 0],
+            barPercentage: 0.5,
             yAxisID: 'y1'
           }
         ]
-      };
+      }
+    },
+    saldoChartOptions() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            type: 'linear',
+            position: 'left',
+            title: {
+              display: true,
+              text: 'Saldo (R$)',
+              font: {
+                weight: 'bold',
+                size: 14
+              }
+            },
+            ticks: {
+              callback: function(value) {
+                if (value >= 1000000) {
+                  return 'R$ ' + (value / 1000000).toLocaleString('pt-BR', { 
+                    minimumFractionDigits: 1, 
+                    maximumFractionDigits: 1 
+                  }) + ' M'
+                } else if (value >= 1000) {
+                  return 'R$ ' + (value / 1000).toLocaleString('pt-BR', { 
+                    minimumFractionDigits: 1, 
+                    maximumFractionDigits: 1 
+                  }) + ' K'
+                }
+                return 'R$ ' + value.toLocaleString('pt-BR')
+              },
+              font: {
+                size: 12
+              }
+            }
+          },
+          y1: {
+            type: 'linear',
+            position: 'right',
+            title: {
+              display: true,
+              text: 'Energia (kWh)',
+              font: {
+                weight: 'bold',
+                size: 14
+              }
+            },
+            ticks: {
+              callback: function(value) {
+                if (value >= 1000000) {
+                  return (value / 1000000).toLocaleString('pt-BR', { 
+                    minimumFractionDigits: 1, 
+                    maximumFractionDigits: 1 
+                  }) + ' M kWh'
+                } else if (value >= 1000) {
+                  return (value / 1000).toLocaleString('pt-BR', { 
+                    minimumFractionDigits: 1, 
+                    maximumFractionDigits: 1 
+                  }) + ' K kWh'
+                }
+                return value.toLocaleString('pt-BR') + ' kWh'
+              },
+              font: {
+                size: 12
+              }
+            },
+            grid: {
+              drawOnChartArea: false
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              font: {
+                size: 12,
+                weight: 'bold'
+              },
+              padding: 20
+            }
+          },
+          title: {
+            display: true,
+            text: 'Saldo e Banco de Energia',
+            font: {
+              size: 16,
+              weight: 'bold'
+            },
+            padding: {
+              top: 10,
+              bottom: 30
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let value = context.raw;
+                if (context.dataset.yAxisID === 'y') {
+                  return 'Saldo: R$ ' + value.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  });
+                } else {
+                  return 'Energia: ' + value.toLocaleString('pt-BR') + ' kWh';
+                }
+              }
+            }
+          }
+        }
+      }
     }
+  },
+  methods: {
+    async verificarAutenticacao() {
+      try {
+        const usuario = await authService.getCurrentUser()
+        if (!usuario || usuario.tipo !== 'Empresa') {
+          this.$router.push('/')
+          return
+        }
+      } catch (error) {
+        console.error('Erro ao verificar autenticação:', error)
+        this.$router.push('/')
+      }
+    },
+
+    async carregarDados() {
+      this.loading = true
+      this.erro = ''
+      
+      try {
+        // Carregar estatísticas da empresa
+        this.stats = await adminService.getEmpresaStats()
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error)
+        this.erro = 'Erro ao carregar dados do painel'
+      } finally {
+        this.loading = false
+      }
+    },
+
+    formatSaldoResumido(value) {
+      if (value >= 1000000) {
+        return 'R$ ' + (value / 1000000).toLocaleString('pt-BR', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1
+        }) + ' M'
+      } else if (value >= 1000) {
+        return 'R$ ' + (value / 1000).toLocaleString('pt-BR', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1
+        }) + ' K'
+      }
+      return 'R$ ' + value.toLocaleString('pt-BR')
+    },
+
+    formatCurrency(value) {
+      return new Intl.NumberFormat('pt-BR', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      }).format(value)
+    },
+
+    irParaPedidos() { this.$router.push('/pedidos') },
+    irParaOfertas() { this.$router.push('/ofertas') },
+    irParaUsuarios() { this.$router.push('/usuariosview') },
+    goTohome() { this.$router.push('/') }
   }
 }
 </script>
@@ -265,13 +398,6 @@ export default {
   align-items: center;
   max-width: 1080px;
   margin: 0 auto;
-}
-
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
-  cursor: pointer;
 }
 
 .logo {
@@ -325,10 +451,58 @@ export default {
   margin-top: 0.5rem;
 }
 
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.erro-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  text-align: center;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid #fcd34d;
+}
+
+.stat-card h3 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #92400e;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card p {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.8rem;
+  margin-bottom: 2rem;
 }
 
 .card {
@@ -340,6 +514,7 @@ export default {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   border: 1px solid #fcd34d;
+  position: relative;
 }
 
 .card h2 {
@@ -351,6 +526,19 @@ export default {
 .card p {
   color: #78350f;
   font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.card-count {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #fcd34d;
+  color: #92400e;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 
 .card:hover {
@@ -372,14 +560,26 @@ export default {
   max-width: 600px;
   margin-top: 50px;
   background: white;
-  padding: 1rem;
+  padding: 1.5rem;
   border-radius: 1rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  height: 350px;
 }
 
 .grafico h2 {
   text-align: center;
   color: #92400e;
   margin-bottom: 1rem;
+}
+
+.saldo-card h3 {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: #047857;
+}
+
+.saldo-card {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
 }
 </style>

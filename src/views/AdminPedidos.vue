@@ -5,86 +5,193 @@
   <div class="admin-pedidos">
     <h1>Gestão de Pedidos de Energia</h1>
 
-    <!-- Pedidos Pendentes -->
-    <section class="pedidos-bloco">
-      <h2>Pedidos Pendentes</h2>
-      <div v-if="pedidosPendentes.length" class="card-container">
-        <div v-for="(pedido, index) in pedidosPendentes" :key="index" class="card pedido">
-          <div class="card-header">
-            <h3>{{ pedido.nomeCliente }}</h3>
-            <span class="email">{{ pedido.emailCliente }}</span>
-          </div>
-          <p><strong>{{ pedido.quantidade }} kWh</strong> solicitados</p>
-          <p><span class="label">Data do pedido:</span> {{ pedido.dataPedido }}</p>
-          <div class="card-actions">
-            <button class="confirmar" @click="firmarContrato(pedido.id)">Confirmar Contrato</button>
-            <button class="cancelar" @click="cancelarPedido(pedido.id)">Cancelar Pedido</button>
-          </div>
-        </div>
-      </div>
-      <p v-else class="mensagem-vazia">Nenhum pedido pendente.</p>
-    </section>
+    <div v-if="loading" class="loading">
+      Carregando pedidos...
+    </div>
 
-    <!-- Contratos Firmados -->
-    <section class="pedidos-bloco">
-      <h2>Contratos Firmados</h2>
-      <div v-if="contratosFirmados.length" class="card-container">
-        <div v-for="(pedido, index) in contratosFirmados" :key="'c'+index" class="card contrato">
-          <div class="card-header">
-            <h3>{{ pedido.nomeCliente }}</h3>
-            <span class="email">{{ pedido.emailCliente }}</span>
+    <div v-else>
+      <!-- Pedidos Pendentes -->
+      <section class="pedidos-bloco">
+        <h2>Pedidos Pendentes</h2>
+        <div v-if="pedidosPendentes.length" class="card-container">
+          <div v-for="(pedido, index) in pedidosPendentes" :key="index" class="card pedido">
+            <div class="card-header">
+              <h3>{{ pedido.nomeCliente || pedido.cliente?.nome || 'Cliente' }}</h3>
+              <span class="email">{{ pedido.emailCliente || pedido.cliente?.email || 'N/A' }}</span>
+            </div>
+            <p><strong>{{ pedido.quantidadeEnergia }} kWh</strong> solicitados</p>
+            <p><span class="label">Data do pedido:</span> {{ formatDate(pedido.dataContrato || pedido.createdAt) }}</p>
+            <p><span class="label">Endereço:</span> {{ pedido.enderecoEntrega || 'N/A' }}</p>
+            <div class="card-actions">
+              <button class="confirmar" @click="firmarContrato(pedido.id)" :disabled="processando">
+                {{ processando ? 'Processando...' : 'Confirmar Contrato' }}
+              </button>
+              <button class="cancelar" @click="cancelarPedido(pedido.id)" :disabled="processando">
+                {{ processando ? 'Processando...' : 'Cancelar Pedido' }}
+              </button>
+            </div>
           </div>
-          <p><strong>{{ pedido.quantidade }} kWh</strong> contratados</p>
-          <p><span class="label">Data do pedido:</span> {{ pedido.dataPedido }}</p>
-          <p class="status">✅ Contrato firmado</p>
         </div>
-      </div>
-      <p v-else class="mensagem-vazia">Nenhum contrato firmado.</p>
-    </section>
+        <p v-else class="mensagem-vazia">Nenhum pedido pendente.</p>
+      </section>
+
+      <!-- Contratos Firmados -->
+      <section class="pedidos-bloco">
+        <h2>Contratos Firmados</h2>
+        <div v-if="contratosFirmados.length" class="card-container">
+          <div v-for="(pedido, index) in contratosFirmados" :key="'c' + index" class="card contrato">
+            <div class="card-header">
+              <h3>{{ pedido.nomeCliente || pedido.cliente?.nome || 'Cliente' }}</h3>
+              <span class="email">{{ pedido.emailCliente || pedido.cliente?.email || 'N/A' }}</span>
+            </div>
+            <p><strong>{{ pedido.quantidadeEnergia }} kWh</strong> contratados</p>
+            <p><span class="label">Data do pedido:</span> {{ formatDate(pedido.dataContrato || pedido.createdAt) }}</p>
+            <p><span class="label">Endereço:</span> {{ pedido.enderecoEntrega || 'N/A' }}</p>
+            <p class="status">✅ Contrato firmado</p>
+          </div>
+        </div>
+        <p v-else class="mensagem-vazia">Nenhum contrato firmado.</p>
+      </section>
+    </div>
+
+    <div v-if="erro" class="erro-message">{{ erro }}</div>
   </div>
 </template>
 
 <script>
+import { adminService } from '@/services/admin'
+
+
+const StatusPedido = {
+  EM_ANALISE: 0,
+  EM_VIGOR: 1,
+  CANCELADO: 2,
+  CONFIRMADO: 3
+}
+
 export default {
   data() {
     return {
-      pedidos: []
+      pedidos: [],
+      loading: false,
+      processando: false,
+      erro: ''
     };
   },
   computed: {
     pedidosPendentes() {
-      return this.pedidos.filter(p => !p.contratoFirmado);
+      return this.pedidos.filter(p =>
+        p.status === StatusPedido.EM_ANALISE ||
+        p.status === StatusPedido.EM_VIGOR
+      );
     },
     contratosFirmados() {
-      return this.pedidos.filter(p => p.contratoFirmado);
+      return this.pedidos.filter(p =>
+        p.status === StatusPedido.CONFIRMADO
+      );
     }
   },
-  mounted() {
-    this.carregarPedidos();
+  async mounted() {
+    await this.carregarPedidos();
   },
   methods: {
     voltarPainel() {
       this.$router.push('/painelempresa');
     },
-    carregarPedidos() {
-      const dados = JSON.parse(localStorage.getItem('pedidosEnergia')) || [];
-      this.pedidos = dados;
-    },
-    salvarPedidos() {
-      localStorage.setItem('pedidosEnergia', JSON.stringify(this.pedidos));
-    },
-    firmarContrato(id) {
-      const pedido = this.pedidos.find(p => p.id === id);
-      if (pedido) {
-        pedido.contratoFirmado = true;
-        this.salvarPedidos();
-        this.carregarPedidos();
+
+    async carregarPedidos() {
+      this.loading = true;
+      this.erro = '';
+
+      try {
+        this.pedidos = await adminService.getPedidos();
+        console.log('Pedidos carregados:', this.pedidos);
+      } catch (error) {
+        console.error('Erro ao carregar pedidos:', error);
+        this.erro = 'Erro ao carregar pedidos. Tente novamente.';
+        this.pedidos = [];
+      } finally {
+        this.loading = false;
       }
     },
-    cancelarPedido(id) {
-      this.pedidos = this.pedidos.filter(p => p.id !== id);
-      this.salvarPedidos();
-      this.carregarPedidos();
+
+    async firmarContrato(id) {
+      console.log('Firmando contrato para pedido ID:', id);
+      console.log('Status que será enviado:', StatusPedido.CONFIRMADO);
+      if (!confirm('Tem certeza que deseja firmar este contrato?')) return;
+
+      this.processando = true;
+      this.erro = '';
+
+      try {
+        await adminService.atualizarStatusPedido(id, StatusPedido.CONFIRMADO);
+
+        // Atualizar localmente
+        const pedido = this.pedidos.find(p => p.id === id);
+        if (pedido) {
+          pedido.status = StatusPedido.CONFIRMADO;
+        }
+      
+        const response = await adminService.atualizarStatusPedido(id, StatusPedido.CONFIRMADO);
+        
+        console.log('Resposta da API:', response);
+
+        const pedidoIndex = this.pedidos.findIndex(p => p.id === id);
+        if (pedidoIndex !== -1) {
+          // Atualizar o status localmente
+          this.pedidos[pedidoIndex].status = StatusPedido.CONFIRMADO;
+          
+          // Forçar reatividade do Vue
+          this.$forceUpdate();
+        }
+        
+        // Mostrar mensagem de sucesso
+        alert('Contrato firmado com sucesso! As alterações serão processadas no próximo ciclo mensal.');
+
+        // Recarregar para garantir dados atualizados
+        await this.carregarPedidos();
+      } catch (error) {
+        console.error('Erro ao firmar contrato:', error);
+        this.erro = 'Erro ao firmar contrato. Tente novamente.';
+      } finally {
+        this.processando = false;
+      }
+    },
+
+    async cancelarPedido(id) {
+      if (!confirm('Tem certeza que deseja cancelar este pedido?')) return;
+
+      this.processando = true;
+      this.erro = '';
+
+      try {
+        await adminService.atualizarStatusPedido(id, StatusPedido.CANCELADO);
+
+        // Atualizar localmente
+        const pedido = this.pedidos.find(p => p.id === id);
+        if (pedido) {
+          pedido.status = StatusPedido.CANCELADO;
+        }
+
+        // Recarregar para garantir dados atualizados
+        await this.carregarPedidos();
+      } catch (error) {
+        console.error('Erro ao cancelar pedido:', error);
+        this.erro = 'Erro ao cancelar pedido. Tente novamente.';
+      } finally {
+        this.processando = false;
+      }
+    },
+
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR');
+      } catch (error) {
+        return dateString;
+      }
     }
   }
 };
@@ -135,6 +242,24 @@ h2 {
   font-size: 1.5rem;
   color: #ff8800;
   margin-bottom: 1rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.erro-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  text-align: center;
 }
 
 .pedidos-bloco {
@@ -199,12 +324,17 @@ button {
   transition: background-color 0.2s ease;
 }
 
+button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
 .confirmar {
   background-color: #27ae60;
   color: white;
 }
 
-.confirmar:hover {
+.confirmar:hover:not(:disabled) {
   background-color: #1e8449;
 }
 
@@ -213,7 +343,7 @@ button {
   color: white;
 }
 
-.cancelar:hover {
+.cancelar:hover:not(:disabled) {
   background-color: #c0392b;
 }
 

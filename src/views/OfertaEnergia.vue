@@ -24,6 +24,9 @@
 </template>
 
 <script>
+import { fornecedorService } from '@/services/fornecedor'
+import { authService } from '@/services/auth'
+
 export default {
   name: 'OfertaEnergia',
   data() {
@@ -35,33 +38,51 @@ export default {
       }
     };
   },
-  methods: {
-    enviarOferta() {
-      const user = JSON.parse(localStorage.getItem('usuarioLogado'));
+  async created() {
+    try {
+      // Verifica se o usuário está autenticado como fornecedor
+      const user = await authService.getCurrentUser()
       if (!user || user.tipo !== 'Fornecedor') {
-        alert('Usuário inválido.');
-        return;
+        this.$router.push('/')
+        return
       }
 
-      const novaOferta = {
-        nome: user.nome,
-        email: user.email,
-        quantidade: this.oferta.quantidade,
-        preco: this.oferta.preco,
-        dataDisponivel: this.oferta.dataDisponivel,
-        contratada: false
-      };
+      // Verifica se já existe uma oferta ativa
+      const ofertas = await fornecedorService.getMinhasOfertas()
+      const temOfertaAtiva = ofertas.some(oferta => 
+        oferta.status === 0 || // EM_ANALISE
+        oferta.status === 1    // EM_VIGOR
+      )
 
-      const ofertas = JSON.parse(localStorage.getItem('ofertasEnergia')) || {};
+      if (temOfertaAtiva) {
+        alert('Você já possui uma oferta ativa. Aguarde sua conclusão para criar uma nova.')
+        this.$router.push('/DashboardFornecedor')
+        return
+      }
+    } catch (error) {
+      console.error('Erro ao verificar usuário/ofertas:', error)
+      this.$router.push('/')
+    }
+  },
+  methods: {
+    async enviarOferta() {
+      try {
+        await fornecedorService.criarOferta({
+          quantidade: Number(this.oferta.quantidade),
+          preco: Number(this.oferta.preco),
+          dataDisponivel: this.oferta.dataDisponivel
+        })
 
-      
-      ofertas[user.email] = novaOferta;
-
-      localStorage.setItem('ofertasEnergia', JSON.stringify(ofertas));
-
-      this.$router.push({ name: 'DashboardFornecedor' }).then(() => {
-        this.$router.go(); 
-      });
+        // Redireciona para o dashboard após criar a oferta
+        this.$router.push('/DashboardFornecedor')
+      } catch (error) {
+        console.error('Erro ao criar oferta:', error)
+        if (error.response?.data?.message) {
+          alert(error.response.data.message)
+        } else {
+          alert('Erro ao criar oferta. Tente novamente.')
+        }
+      }
     }
   }
 };

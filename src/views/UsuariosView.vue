@@ -6,8 +6,11 @@
 
     <h1 class="titulo">Painel de Usuários</h1>
 
-    <div class="cards-container">
+    <div v-if="loading" class="loading">
+      Carregando dados dos usuários...
+    </div>
 
+    <div v-else class="cards-container">
       <!-- Clientes -->
       <div class="card">
         <h2 class="card-title">Clientes Cadastrados</h2>
@@ -16,12 +19,16 @@
             <tr>
               <th>Nome</th>
               <th>Email</th>
+              <th>CPF/CNPJ</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="cliente in clientes" :key="cliente.email">
+            <tr v-for="cliente in clientes" :key="cliente.id">
               <td>{{ cliente.nome }}</td>
               <td>{{ cliente.email }}</td>
+              <td>{{ cliente.cpfCnpj || 'N/A' }}</td>
+              <td>{{ cliente.status || 'Ativo' }}</td>
             </tr>
           </tbody>
         </table>
@@ -36,12 +43,16 @@
             <tr>
               <th>Nome</th>
               <th>Email</th>
+              <th>CPF/CNPJ</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="fornecedor in fornecedores" :key="fornecedor.email">
+            <tr v-for="fornecedor in fornecedores" :key="fornecedor.id">
               <td>{{ fornecedor.nome }}</td>
               <td>{{ fornecedor.email }}</td>
+              <td>{{ fornecedor.cpfCnpj || 'N/A' }}</td>
+              <td>{{ fornecedor.status || 'Ativo' }}</td>
             </tr>
           </tbody>
         </table>
@@ -51,148 +62,170 @@
       <!-- Endereços Pendentes -->
       <div class="card">
         <h2 class="card-title">Endereços Pendentes de Aprovação</h2>
-        <table v-if="enderecosPendentes.length" class="tabela">
+        <table v-if="clientesComEnderecosPendentes.length" class="tabela">
           <thead>
             <tr>
-              <th>Rua / Logradouro</th>
-              <th>Comprovante</th>
               <th>Cliente</th>
+              <th>Email</th>
+              <th>Endereço</th>
+              <th>Data de Envio</th>
               <th>Ações</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="endereco in enderecosPendentes" :key="endereco.id">
-              <td>{{ endereco.texto }}</td>
+            <tr v-for="cliente in clientesComEnderecosPendentes" :key="cliente.id">
+              <td>{{ cliente.nome }}</td>
+              <td>{{ cliente.email }}</td>
+              <td>{{ cliente.enderecoCompleto }}</td>
+              <td>{{ formatarData(cliente.dataEnvioComprovante) }}</td>
               <td>
-                <a v-if="endereco.comprovante && endereco.comprovante.conteudo" :href="endereco.comprovante.conteudo"
-                  :download="endereco.comprovante.nome" class="comprovante-btn">
-                  Baixar
-                </a>
-                <span v-else style="color: gray;">Não enviado</span>
-              </td>
-              <td>{{ getClienteNome(endereco.emailUsuario) }}</td>
-              <td>
-                <button class="aprovar-btn" @click="aprovarEndereco(endereco.id)">Aprovar</button>
-                <button class="rejeitar-btn" @click="rejeitarEndereco(endereco.id)">Rejeitar</button>
+                <button class="aprovar-btn" 
+                        @click="aprovarEndereco(cliente.id)" 
+                        :disabled="processando">
+                  {{ processando ? 'Processando...' : 'Aprovar' }}
+                </button>
+                <button class="rejeitar-btn" 
+                        @click="rejeitarEndereco(cliente.id)" 
+                        :disabled="processando">
+                  {{ processando ? 'Processando...' : 'Rejeitar' }}
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
         <p v-else class="mensagem-vazia">Nenhum endereço pendente.</p>
       </div>
-
     </div>
+
+    <div v-if="erro" class="erro-message">{{ erro }}</div>
+    <div v-if="sucesso" class="sucesso-message">{{ sucesso }}</div>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+<script>
+import { adminService } from '@/services/admin'
 
-const clientes = ref([])
-const fornecedores = ref([])
-const enderecosPendentes = ref([])
-
-const router = useRouter()
-
-function voltarParaPainel() {
-  router.push('/painelempresa')
-}
-
-function getClienteNome(email) {
-  if (!email) return 'Desconhecido'
-  const emailClean = email.toLowerCase().trim()
-  const cliente = clientes.value.find(c => c.email.toLowerCase().trim() === emailClean)
-  return cliente ? cliente.nome : 'Desconhecido'
-}
-
-
-function aprovarEndereco(id) {
-  const enderecos = JSON.parse(localStorage.getItem('enderecos')) || [];
-  const idx = enderecos.findIndex(e => e.id === id);
-
-  if (idx === -1) return;
-
-  // Atualiza o endereço
-  enderecos[idx].status = 'aprovado';
-  enderecos[idx].validado = true;
-
-  // Salva no localStorage
-  localStorage.setItem('enderecos', JSON.stringify(enderecos));
-
-  // Atualiza também no usuário correspondente
-  const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
-  const usuarioIdx = usuarios.findIndex(u => u.email === enderecos[idx].emailUsuario);
-
-  if (usuarioIdx !== -1) {
-    const usuario = usuarios[usuarioIdx];
-    const enderecoUsuarioIdx = usuario.enderecos.findIndex(e => e.id === id);
-    if (enderecoUsuarioIdx !== -1) {
-      usuario.enderecos[enderecoUsuarioIdx].validado = true;
-      usuario.enderecos[enderecoUsuarioIdx].status = 'aprovado';
+export default {
+  data() {
+    return {
+      clientes: [],
+      fornecedores: [],
+      loading: false,
+      processando: false,
+      erro: '',
+      sucesso: ''
     }
-
-    usuarios[usuarioIdx] = usuario;
-    localStorage.setItem('usuarios', JSON.stringify(usuarios));
-  }
-
-  // Atualiza a lista reativa
-  carregarEnderecosPendentes();
-}
-
-
-
-
-function rejeitarEndereco(id) {
-  const enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
-  const enderecoRemover = enderecos.find(e => e.id === id)
-  const novosEnderecos = enderecos.filter(e => e.id !== id)
-  localStorage.setItem('enderecos', JSON.stringify(novosEnderecos))
-
-
-  // Remove do usuário
-  if (enderecoRemover) {
-    const usuarios = JSON.parse(localStorage.getItem('usuarios')) || []
-    const usuarioIdx = usuarios.findIndex(u => u.email === enderecoRemover.clienteEmail)
-    if (usuarioIdx !== -1) {
-      const usuario = usuarios[usuarioIdx]
-      usuario.enderecos = usuario.enderecos.filter(e => e.id !== id)
-      usuarios[usuarioIdx] = usuario
-      localStorage.setItem('usuarios', JSON.stringify(usuarios))
+  },
+  computed: {
+    clientesComEnderecosPendentes() {
+      return this.clientes.filter(cliente => 
+        cliente.statusAprovacaoComprovante === 'Pendente'
+      )
     }
+  },
+  methods: {
+    voltarParaPainel() {
+      this.$router.push('/painelempresa')
+    },
+
+    formatarData(dataString) {
+      if (!dataString) return 'N/A'
+      
+      try {
+        const data = new Date(dataString)
+        return data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      } catch (error) {
+        return dataString
+      }
+    },
+
+    async aprovarEndereco(clienteId) {
+      if (!confirm('Tem certeza que deseja aprovar o endereço deste cliente?')) return
+      
+      this.processando = true
+      this.erro = ''
+      this.sucesso = ''
+      
+      try {
+        console.log('🔄 Aprovando endereço do cliente ID:', clienteId)
+        
+        // Chamar API para aprovar endereço
+        await adminService.aprovarEndereco(clienteId)
+        
+        this.sucesso = 'Endereço aprovado com sucesso! O cliente já pode fazer pedidos.'
+        
+        // Recarregar dados para atualizar a lista
+        await this.carregarDados()
+        
+        // Mostrar mensagem adicional
+        setTimeout(() => {
+          this.sucesso = ''
+        }, 5000)
+        
+      } catch (error) {
+        console.error('❌ Erro ao aprovar endereço:', error)
+        this.erro = 'Erro ao aprovar endereço. Tente novamente.'
+      } finally {
+        this.processando = false
+      }
+    },
+
+    async rejeitarEndereco(clienteId) {
+      const motivo = prompt('Por favor, informe o motivo da rejeição:')
+      if (motivo === null) return // Usuário cancelou
+      
+      if (!motivo.trim()) {
+        alert('É necessário informar um motivo para rejeitar o endereço.')
+        return
+      }
+      
+      this.processando = true
+      this.erro = ''
+      this.sucesso = ''
+      
+      try {
+        // Chamar API para rejeitar endereço
+        await adminService.rejeitarEndereco(clienteId, motivo)
+        
+        this.sucesso = 'Endereço rejeitado com sucesso!'
+        
+        // Recarregar dados para atualizar a lista
+        await this.carregarDados()
+      } catch (error) {
+        console.error('Erro ao rejeitar endereço:', error)
+        this.erro = 'Erro ao rejeitar endereço. Tente novamente.'
+      } finally {
+        this.processando = false
+      }
+    },
+
+    async carregarDados() {
+      this.loading = true
+      this.erro = ''
+      
+      try {
+        // Carregar clientes do backend
+        this.clientes = await adminService.getClientes()
+        
+        // Carregar fornecedores do backend
+        this.fornecedores = await adminService.getFornecedores()
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error)
+        this.erro = 'Erro ao carregar dados dos usuários. Tente novamente.'
+        this.clientes = []
+        this.fornecedores = []
+      } finally {
+        this.loading = false
+      }
+    }
+  },
+  mounted() {
+    this.carregarDados()
   }
-
-  carregarEnderecosPendentes()
 }
-
-function carregarEnderecosPendentes() {
-  const usuarios = JSON.parse(localStorage.getItem('usuarios')) || []
-  clientes.value = usuarios.filter(u => u.tipo === 'Cliente')
-  fornecedores.value = usuarios.filter(u => u.tipo === 'Fornecedor')
-
-  const enderecos = JSON.parse(localStorage.getItem('enderecos')) || []
-  enderecosPendentes.value = enderecos.filter(e => !e.validado)
-
-  console.log('Endereços pendentes:', enderecosPendentes.value)
-}
-
-onMounted(() => {
-  carregarEnderecosPendentes()
-  localStorage.removeItem('enderecosPendentes')
-
-  setTimeout(() => {
-    console.log('Clientes:', clientes.value)
-    console.log('Endereços Pendentes:', enderecosPendentes.value)
-  }, 300)
-})
-
-import { watch } from 'vue'
-
-watch(clientes, (novosClientes) => {
-  console.log('Clientes atualizados:', novosClientes)
-  console.log('Recalculando nomes dos clientes pendentes...')
-})
-
 </script>
 
 <style scoped>
@@ -236,6 +269,35 @@ body {
   margin-bottom: 50px;
   color: #2c3e50;
   font-weight: 600;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.erro-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  text-align: center;
+}
+
+.sucesso-message {
+  color: #059669;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #ecfdf5;
+  border-radius: 8px;
+  border: 1px solid #a7f3d0;
+  text-align: center;
 }
 
 .cards-container {
@@ -309,8 +371,13 @@ body {
   margin-right: 8px;
 }
 
-.aprovar-btn:hover {
+.aprovar-btn:hover:not(:disabled) {
   background-color: #45a049;
+}
+
+.aprovar-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
 }
 
 .rejeitar-btn {
@@ -324,7 +391,12 @@ body {
   transition: background-color 0.3s ease;
 }
 
-.rejeitar-btn:hover {
+.rejeitar-btn:hover:not(:disabled) {
   background-color: #da190b;
+}
+
+.rejeitar-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
 }
 </style>

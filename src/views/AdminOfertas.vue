@@ -3,89 +3,212 @@
         <button @click="voltarPainel">← Voltar ao Painel da Empresa</button>
     </nav>
     <div class="admin-ofertas">
-
-
         <h1>Gestão de Ofertas de Energia</h1>
 
-        <!-- Ofertas Disponíveis -->
-        <section class="ofertas-bloco">
-            <h2>Ofertas Disponíveis</h2>
+        <div v-if="loading" class="loading">
+            Carregando ofertas...
+        </div>
 
-            <div v-if="ofertas.length" class="card-container">
-                <div v-for="(oferta, index) in ofertas" :key="index" class="card oferta">
-                    <div class="card-header">
-                        <h3>{{ oferta.nome }}</h3>
-                        <span class="email">{{ oferta.email }}</span>
-                    </div>
-                    <p><strong>{{ oferta.quantidade }} kWh</strong> a <strong>R$ {{ oferta.preco }}</strong> por kWh</p>
-                    <p><span class="label">Disponível em:</span> {{ oferta.dataDisponivel }}</p>
+        <div v-else>
+            <!-- Ofertas Disponíveis -->
+            <section class="ofertas-bloco">
+                <h2>Contratos de Energia</h2>
 
-                    <div class="card-actions">
-                        <button class="contratar" @click="firmarContrato(oferta.email)">Firmar Contrato</button>
-                        <button class="excluir" @click="excluirOferta(oferta.email)">Excluir</button>
+                <div v-if="ofertas.length" class="card-container">
+                    <div v-for="(oferta, index) in ofertas" :key="oferta.id" class="card oferta">
+                        <div class="card-header">
+                            <h3>{{ oferta.fornecedorNome }}</h3>
+                            <span :class="getStatusClass(oferta.status)">{{ getStatusText(oferta.status) }}</span>
+                        </div>
+                        <p><strong>{{ oferta.quantidadeEnergia.toLocaleString('pt-BR') }} kWh</strong></p>
+                        <p><span class="label">Valor:</span> R$ {{ formatCurrency(oferta.valorContrato) }} por kWh</p>
+                        <p><span class="label">Data do Contrato:</span> {{ formatDate(oferta.dataContrato) }}</p>
+
+                        <div class="card-actions" v-if="oferta.status === StatusContrato.EM_ANALISE">
+                            <button class="contratar" 
+                                    @click="firmarContrato(oferta.id)" 
+                                    :disabled="processando">
+                                {{ processando ? 'Processando...' : 'Aprovar Contrato' }}
+                            </button>
+                            <button class="excluir" 
+                                    @click="excluirOferta(oferta.id)" 
+                                    :disabled="processando">
+                                {{ processando ? 'Processando...' : 'Cancelar' }}
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <p v-else class="mensagem-vazia">Nenhuma oferta disponível.</p>
-        </section>
+                <p v-else class="mensagem-vazia">Nenhum contrato disponível.</p>
+            </section>
+        </div>
 
-        <!-- Ofertas Contratadas -->
-        <section class="ofertas-bloco">
-            <h2>Ofertas Contratadas</h2>
-
-            <div v-if="ofertasContratadas.length" class="card-container">
-                <div v-for="(oferta, index) in ofertasContratadas" :key="'c' + index" class="card contratada">
-                    <div class="card-header">
-                        <h3>{{ oferta.nome }}</h3>
-                        <span class="email">{{ oferta.email }}</span>
-                    </div>
-                    <p><strong>{{ oferta.quantidade }} kWh</strong> a <strong>R$ {{ oferta.preco }}</strong> por kWh</p>
-                    <p v-if="oferta.dataDisponivel">
-                        <span class="label">Disponível em:</span> {{ oferta.dataDisponivel }}
-                    </p>
-                    <p class="status">✅ Contrato firmado</p>
-                </div>
-            </div>
-            <p v-else class="mensagem-vazia">Nenhuma oferta contratada.</p>
-        </section>
+        <div v-if="erro" class="erro-message">{{ erro }}</div>
     </div>
 </template>
 
 <script>
+import { adminService } from '@/services/admin'
+
+const StatusContrato = {
+    EM_ANALISE: 0,
+    EM_VIGOR: 1,
+    CANCELADO: 2,
+    CONCLUIDO: 3
+}
+
 export default {
     data() {
         return {
-            ofertas: [],
-            ofertasContratadas: []
+            todasOfertas: [],
+            loading: false,
+            processando: false,
+            erro: '',
+            StatusContrato
         };
     },
-    mounted() {
-        this.carregarOfertas();
+    computed: {
+        ofertas() {
+            // Todas as ofertas dos fornecedores estão em análise
+            return this.todasOfertas;
+        },
+        ofertasContratadas() {
+            // Não temos mais ofertas contratadas aqui
+            return [];
+        }
+    },
+    async mounted() {
+        await this.carregarOfertas();
     },
     methods: {
         voltarPainel() {
             this.$router.push('/painelempresa');
         },
-        carregarOfertas() {
-            const dados = JSON.parse(localStorage.getItem('ofertasEnergia')) || {};
-            const todas = Object.values(dados);
-            this.ofertas = todas.filter(oferta => !oferta.contratada);
-            this.ofertasContratadas = todas.filter(oferta => oferta.contratada);
-        },
-        excluirOferta(email) {
-            const dados = JSON.parse(localStorage.getItem('ofertasEnergia')) || {};
-            delete dados[email];
-            localStorage.setItem('ofertasEnergia', JSON.stringify(dados));
-            this.carregarOfertas();
-        },
-        firmarContrato(email) {
-            const dados = JSON.parse(localStorage.getItem('ofertasEnergia')) || {};
-            if (dados[email]) {
-                dados[email].contratada = true;
-                localStorage.setItem('ofertasEnergia', JSON.stringify(dados));
-                this.carregarOfertas();
+
+        async carregarOfertas() {
+            console.log('🔄 Iniciando carregamento de contratos...');
+            this.loading = true;
+            this.erro = '';
+            
+            try {
+                // Carregar todos os contratos
+                console.log('📡 Fazendo requisição para contratos...');
+                const contratos = await adminService.getContratos();
+                console.log('✅ Contratos recebidos:', contratos);
+
+                // Mapear os contratos
+                this.todasOfertas = contratos.map(contrato => ({
+                    id: contrato.id,
+                    fornecedorNome: contrato.fornecedorNome,
+                    quantidadeEnergia: contrato.quantidadeEnergia,
+                    valorContrato: contrato.valorContrato,
+                    dataContrato: contrato.dataContrato || contrato.createdAt,
+                    status: contrato.status
+                }));
+
+                console.log('🔍 Contratos mapeados:', this.todasOfertas);
+            } catch (error) {
+                console.error('❌ Erro ao carregar contratos:', error);
+                console.error('Detalhes do erro:', {
+                    message: error.message,
+                    response: error.response?.data,
+                    status: error.response?.status
+                });
+                this.erro = 'Erro ao carregar contratos. Tente novamente.';
+                this.todasOfertas = [];
+            } finally {
+                this.loading = false;
+                console.log('🏁 Carregamento finalizado. Total de contratos:', this.todasOfertas.length);
             }
-        }
+        },
+
+        getStatusClass(status) {
+            switch (status) {
+                case StatusContrato.EM_ANALISE:
+                    return 'status-analise'
+                case StatusContrato.EM_VIGOR:
+                    return 'status-vigor'
+                case StatusContrato.CANCELADO:
+                    return 'status-cancelado'
+                case StatusContrato.CONCLUIDO:
+                    return 'status-concluido'
+                default:
+                    return ''
+            }
+        },
+
+        getStatusText(status) {
+            switch (status) {
+                case StatusContrato.EM_ANALISE:
+                    return '⏳ Em Análise'
+                case StatusContrato.EM_VIGOR:
+                    return '✅ Em Vigor'
+                case StatusContrato.CANCELADO:
+                    return '❌ Cancelado'
+                case StatusContrato.CONCLUIDO:
+                    return '🏆 Concluído'
+                default:
+                    return 'Status Desconhecido'
+            }
+        },
+
+        async excluirOferta(id) {
+            if (!confirm('Tem certeza que deseja cancelar este contrato?')) return;
+            
+            this.processando = true;
+            this.erro = '';
+            
+            try {
+                await adminService.atualizarStatusContrato(id, StatusContrato.CANCELADO);
+                const oferta = this.todasOfertas.find(o => o.id === id);
+                if (oferta) {
+                    oferta.status = StatusContrato.CANCELADO;
+                }
+            } catch (error) {
+                console.error('Erro ao cancelar contrato:', error);
+                this.erro = 'Erro ao cancelar contrato. Tente novamente.';
+            } finally {
+                this.processando = false;
+            }
+        },
+
+        async firmarContrato(id) {
+            if (!confirm('Tem certeza que deseja aprovar este contrato?')) return;
+            
+            this.processando = true;
+            this.erro = '';
+            
+            try {
+                console.log('📝 Iniciando aprovação do contrato:', id);
+                await adminService.atualizarStatusContrato(id, StatusContrato.EM_VIGOR);
+                
+                // Recarregar ofertas
+                await this.carregarOfertas();
+                
+            } catch (error) {
+                console.error('❌ Erro ao aprovar contrato:', error);
+                this.erro = 'Erro ao aprovar contrato. Tente novamente.';
+            } finally {
+                this.processando = false;
+            }
+        },
+
+        formatCurrency(value) {
+            if (!value) return '0,00';
+            return new Intl.NumberFormat('pt-BR', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            }).format(value);
+        },
+
+        formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('pt-BR');
+            } catch (error) {
+                return dateString;
+            }
+        },
     }
 };
 </script>
@@ -137,6 +260,24 @@ h2 {
     margin-bottom: 1rem;
 }
 
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.erro-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: #fef2f2;
+    border-radius: 8px;
+    border: 1px solid #fecaca;
+    text-align: center;
+}
+
 .ofertas-bloco {
     margin-bottom: 3rem;
 }
@@ -163,18 +304,21 @@ h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .card-header h3 {
     font-size: 1.2rem;
     margin: 0;
     color: #333;
+    flex: 1;
 }
 
-.email {
-    font-size: 0.9rem;
-    color: #888;
+.preco {
+    font-size: 1.1rem;
+    color: #2ecc71;
+    font-weight: bold;
 }
 
 .label {
@@ -199,12 +343,17 @@ button {
     transition: background-color 0.2s ease;
 }
 
+button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
 .contratar {
     background-color: #2ecc71;
     color: white;
 }
 
-.contratar:hover {
+.contratar:hover:not(:disabled) {
     background-color: #27ae60;
 }
 
@@ -213,7 +362,7 @@ button {
     color: white;
 }
 
-.excluir:hover {
+.excluir:hover:not(:disabled) {
     background-color: #c0392b;
 }
 
@@ -222,10 +371,36 @@ button {
     border: 1px solid #b2f2bb;
 }
 
-.status {
-    margin-top: 0.8rem;
+.status-analise {
+    color: #f39c12;
+    background-color: #fef3c7;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
     font-weight: bold;
+}
+
+.status-vigor {
     color: #2ecc71;
+    background-color: #ecfdf5;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.status-cancelado {
+    color: #e74c3c;
+    background-color: #fef2f2;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.status-concluido {
+    color: #3498db;
+    background-color: #eff6ff;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: bold;
 }
 
 .mensagem-vazia {
