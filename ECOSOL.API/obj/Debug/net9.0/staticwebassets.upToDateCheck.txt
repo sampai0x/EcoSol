@@ -1,1 +1,4 @@
 wwwroot\uploads\comprovantes\cliente_35_839e8786-5a17-49f5-afc6-7f48643f8c04.jpg
+wwwroot\uploads\comprovantes\cliente_21_0aa88392-6b7a-481a-945d-e3b031ea4399.pdf
+wwwroot\uploads\comprovantes\cliente_21_d77cc74a-72e1-4568-bdf0-36806fa38abb.pdf
+wwwroot\uploads\comprovantes\cliente_23_8711ae39-0d54-4623-87d2-0e16814b01df.pdf

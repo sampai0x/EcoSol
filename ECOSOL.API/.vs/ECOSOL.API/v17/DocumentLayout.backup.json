@@ -1,7 +1,44 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Teste\\Desktop\\Projeto_PA\\ECOSOL.API\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|c:\\users\\pedro\\downloads\\ecosol.api\\enums\\statuscontrato.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|solutionrelative:enums\\statuscontrato.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|c:\\users\\pedro\\downloads\\ecosol.api\\enums\\statusaprovacao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|solutionrelative:enums\\statusaprovacao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|c:\\users\\pedro\\downloads\\ecosol.api\\controllers\\adminusuarioscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|solutionrelative:controllers\\adminusuarioscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|c:\\users\\pedro\\downloads\\ecosol.api\\controllers\\admincontratoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|solutionrelative:controllers\\admincontratoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|c:\\users\\pedro\\downloads\\ecosol.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|c:\\users\\pedro\\downloads\\ecosol.api\\entities\\cliente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|solutionrelative:entities\\cliente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|c:\\users\\pedro\\downloads\\ecosol.api\\entities\\pedido.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|solutionrelative:entities\\pedido.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|c:\\users\\pedro\\downloads\\ecosol.api\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|solutionrelative:properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|c:\\users\\pedro\\downloads\\ecosol.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{85369ED8-D2C9-8B63-8AA0-77BE5B01BC56}|ECOSOL.API.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +46,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Bookmark",
@@ -34,6 +71,121 @@
             {
               "$type": "Bookmark",
               "Name": "ST:130:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "StatusContrato.cs",
+              "DocumentMoniker": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Enums\\StatusContrato.cs",
+              "RelativeDocumentMoniker": "Enums\\StatusContrato.cs",
+              "ToolTip": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Enums\\StatusContrato.cs",
+              "RelativeToolTip": "Enums\\StatusContrato.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-05T03:19:39.667Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AdminUsuariosController.cs",
+              "DocumentMoniker": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Controllers\\AdminUsuariosController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AdminUsuariosController.cs",
+              "ToolTip": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Controllers\\AdminUsuariosController.cs",
+              "RelativeToolTip": "Controllers\\AdminUsuariosController.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAmwB4AAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-05T02:09:30.686Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AdminContratosController.cs",
+              "DocumentMoniker": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Controllers\\AdminContratosController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AdminContratosController.cs",
+              "ToolTip": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Controllers\\AdminContratosController.cs",
+              "RelativeToolTip": "Controllers\\AdminContratosController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-05T02:09:14.28Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "StatusAprovacao.cs",
+              "DocumentMoniker": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Enums\\StatusAprovacao.cs",
+              "RelativeDocumentMoniker": "Enums\\StatusAprovacao.cs",
+              "ToolTip": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Enums\\StatusAprovacao.cs",
+              "RelativeToolTip": "Enums\\StatusAprovacao.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-05T00:11:54.868Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Cliente.cs",
+              "DocumentMoniker": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Entities\\Cliente.cs",
+              "RelativeDocumentMoniker": "Entities\\Cliente.cs",
+              "ToolTip": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Entities\\Cliente.cs",
+              "RelativeToolTip": "Entities\\Cliente.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-05T00:11:26.715Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Pedido.cs",
+              "DocumentMoniker": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Entities\\Pedido.cs",
+              "RelativeDocumentMoniker": "Entities\\Pedido.cs",
+              "ToolTip": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Entities\\Pedido.cs",
+              "RelativeToolTip": "Entities\\Pedido.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-04T20:41:33.569Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-06-04T16:09:48.534Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "Properties\\launchSettings.json",
+              "ToolTip": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Properties\\launchSettings.json",
+              "RelativeToolTip": "Properties\\launchSettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-06-04T16:09:38.9Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\Pedro\\Downloads\\ECOSOL.API\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAAADsAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-04T15:43:22.529Z",
+              "EditorCaption": ""
             }
           ]
         }
