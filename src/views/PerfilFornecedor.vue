@@ -17,6 +17,10 @@
 
     <h1>Meu Perfil</h1>
 
+    <div v-if="erro" class="erro-mensagem">
+      {{ erro }}
+    </div>
+
     <div class="perfil-card">
       <div v-if="!editando">
         <p><strong>Nome:</strong> {{ perfil.nome }}</p>
@@ -24,6 +28,9 @@
         <p><strong>Tipo de Conta:</strong> {{ perfil.tipo }}</p>
         <p><strong>CPF/CNPJ:</strong> {{ perfil.cpfCnpj }}</p>
         <p><strong>Endereço:</strong> {{ perfil.endereco }}</p>
+        <p><strong>Telefone:</strong> {{ perfil.telefone }}</p>
+        <p><strong>Cidade:</strong> {{ perfil.cidade }}</p>
+        <p><strong>Estado:</strong> {{ perfil.estado }}</p>
       </div>
       <div v-else>
         <div class="form-group">
@@ -41,6 +48,22 @@
           <input type="text" v-model="perfil.endereco" />
         </div>
 
+        <div class="form-group">
+          <label>Telefone:</label>
+          <input type="text" v-model="perfil.telefone" />
+        </div>
+
+        <div class="form-group">
+          <label>Cidade:</label>
+          <input type="text" v-model="perfil.cidade" />
+        </div>
+
+        <div class="form-group">
+          <label>Estado:</label>
+          <input type="text" v-model="perfil.estado" />
+        </div>
+
+      
         <div class="form-group readonly">
           <label>Tipo de Conta:</label>
           <span>{{ perfil.tipo }}</span>
@@ -64,61 +87,80 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
+import { fornecedorService } from '@/services/fornecedor'
 
 const perfil = ref({
   nome: '',
   email: '',
   tipo: '',
   cpfCnpj: '',
-  endereco: ''
+  endereco: '',
+  telefone: '',
+  cidade: '',
+  estado: '',
+  senha: ''
 })
 
 const originalPerfil = ref({})
 const editando = ref(false)
 const router = useRouter()
+const erro = ref('')
 
 const voltarDashboard = () => {
   router.push('/DashboardFornecedor')
 }
 
-const carregarPerfil = () => {
-  const usuario = JSON.parse(localStorage.getItem('usuarioLogado'))
-  if (usuario) {
+const carregarPerfil = async () => {
+  try {
+    const dadosPerfil = await fornecedorService.getPerfil()
     perfil.value = {
-      nome: usuario.nome,
-      email: usuario.email,
-      tipo: usuario.tipo,
-      cpfCnpj: usuario.cpfCnpj,
-      endereco: usuario.endereco
+      nome: dadosPerfil.nome,
+      email: dadosPerfil.email,
+      tipo: 'Fornecedor',
+      cpfCnpj: dadosPerfil.cpfCnpj,
+      endereco: dadosPerfil.endereco,
+      telefone: dadosPerfil.telefone || '',
+      cidade: dadosPerfil.cidade || '',
+      estado: dadosPerfil.estado || '',
+      senha: ''  // A senha não vem do backend por segurança
     }
+  } catch (error) {
+    console.error('Erro ao carregar perfil:', error)
+    erro.value = 'Erro ao carregar dados do perfil'
   }
 }
 
 const editarPerfil = () => {
-  originalPerfil.value = { ...perfil.value };
+  originalPerfil.value = { ...perfil.value }
   editando.value = true
 }
 
-const salvarEdicao = () => {
-  localStorage.setItem('usuarioLogado', JSON.stringify(perfil.value))
-
-
-  const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]')
-  const index = usuarios.findIndex(u => u.email === originalPerfil.value.email)
-
-  if (index !== -1) {
-    usuarios[index] = { ...perfil.value }
-    localStorage.setItem('usuarios', JSON.stringify(usuarios))
+const salvarEdicao = async () => {
+  try {
+    await fornecedorService.atualizarPerfil({
+      nome: perfil.value.nome,
+      email: perfil.value.email,
+      cpfCnpj: perfil.value.cpfCnpj,
+      endereco: perfil.value.endereco,
+      telefone: perfil.value.telefone,
+      cidade: perfil.value.cidade,
+      estado: perfil.value.estado,
+      senha: perfil.value.senha
+    })
+    
+    editando.value = false
+    erro.value = ''
+  } catch (error) {
+    console.error('Erro ao atualizar perfil:', error)
+    erro.value = 'Erro ao salvar alterações. Tente novamente.'
   }
-
-  editando.value = false
 }
 
 const cancelarEdicao = () => {
   perfil.value = { ...originalPerfil.value }
   editando.value = false
+  erro.value = ''
 }
-
 
 onMounted(() => {
   carregarPerfil()
@@ -264,5 +306,15 @@ button {
 
 button:hover {
   background-color: #e67300;
+}
+
+.erro-mensagem {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 500;
 }
 </style>

@@ -16,7 +16,14 @@
       <section class="offers">
         <div class="offers-header">
           <h2>Ofertas de Energia</h2>
-          <button @click="goToOfertaEnergia">+ Nova Oferta</button>
+          <div class="nova-oferta-container">
+            <button @click="goToOfertaEnergia" 
+                    :disabled="!podecriarNovaOferta"
+                    :class="{ 'disabled': !podecriarNovaOferta }"
+                    class="btn-nova-oferta">
+              + Nova Oferta
+            </button>
+          </div>
         </div>
 
         <div v-if="offers.length === 0" class="no-offers">
@@ -24,13 +31,16 @@
         </div>
 
         <ul class="offers-list">
-          <li v-for="(offer, index) in offers" :key="index" class="offer-item">
+          <li v-for="(offer, index) in offers" :key="offer.id" class="offer-item">
             <div>
-              <strong>{{ offer.quantidade }} kWh</strong><br />
-              <span>R$ {{ offer.preco }} por kWh</span><br />
-              <span v-if="offer.contratada" style="color: green; font-weight: bold;">Contrato Firmado</span>
+              <strong>{{ offer.quantidadeEnergia }} kWh</strong><br />
+              <span>R$ {{ offer.valorContrato.toFixed(2) }} por kWh</span><br />
+              <span>Disponível em: {{ new Date(offer.dataContrato).toLocaleDateString() }}</span><br />
+              <span :class="getStatusClass(offer.status)" class="status-badge">
+                {{ getStatusText(offer.status) }}
+              </span>
             </div>
-            <button v-if="!offer.contratada" @click="removerOferta(index)">Cancelar</button>
+            
           </li>
         </ul>
       </section>
@@ -40,22 +50,42 @@
 
 <script>
 import Toast from '../components/Toast.vue'
+import { fornecedorService } from '@/services/fornecedor'
+import { authService } from '@/services/auth'
+
+const StatusContrato = {
+  EM_ANALISE: 0,
+  EM_VIGOR: 1,
+  CANCELADO: 2,
+  CONCLUIDO: 3
+}
 
 export default {
   components: { Toast },
   data() {
     return {
       toastMessage: '',
-      offers: []
+      offers: [],
+      StatusContrato
+    }
+  },
+  computed: {
+    podecriarNovaOferta() {
+      return this.offers.length === 0
     }
   },
   mounted() {
     this.loadOffers()
   },
   methods: {
-    logout() {
-      localStorage.removeItem('usuarioLogado')
-      this.$router.push('/')
+    async logout() {
+      try {
+        await authService.logout()
+        this.$router.push('/')
+      } catch (error) {
+        console.error('Erro ao fazer logout:', error)
+        this.$router.push('/')
+      }
     },
     goToPerfil() {
       this.$router.push('/PerfilFornecedor')
@@ -66,26 +96,43 @@ export default {
     goToOfertaEnergia() {
       this.$router.push('/OfertaEnergia')
     },
-    loadOffers() {
-      const user = JSON.parse(localStorage.getItem('usuarioLogado'));
-      const todasOfertas = JSON.parse(localStorage.getItem('ofertasEnergia')) || {};
-      if (user && todasOfertas[user.email]) {
-        this.offers = [todasOfertas[user.email]];
-      } else {
-        this.offers = [];
+    async loadOffers() {
+      try {
+        const ofertas = await fornecedorService.getMinhasOfertas()
+        this.offers = ofertas
+      } catch (error) {
+        console.error('Erro ao carregar ofertas:', error)
+        this.offers = []
       }
     },
-    removerOferta() {
-      const user = JSON.parse(localStorage.getItem('usuarioLogado'));
-      const ofertas = JSON.parse(localStorage.getItem('ofertasEnergia')) || {};
-      delete ofertas[user.email];
-      localStorage.setItem('ofertasEnergia', JSON.stringify(ofertas));
-      this.offers = [];
-
-      this.toastMessage = '';
-      setTimeout(() => {
-        this.toastMessage = 'Oferta removida com sucesso!';
-      }, 50);
+    
+    getStatusText(status) {
+      switch (status) {
+        case StatusContrato.EM_ANALISE:
+          return '⏳ Em Análise'
+        case StatusContrato.EM_VIGOR:
+          return '✅ Em Vigor'
+        case StatusContrato.CANCELADO:
+          return '❌ Cancelado'
+        case StatusContrato.CONCLUIDO:
+          return '🏆 Concluído'
+        default:
+          return 'Status Desconhecido'
+      }
+    },
+    getStatusClass(status) {
+      switch (status) {
+        case StatusContrato.EM_ANALISE:
+          return 'status-analise'
+        case StatusContrato.EM_VIGOR:
+          return 'status-vigor'
+        case StatusContrato.CANCELADO:
+          return 'status-cancelado'
+        case StatusContrato.CONCLUIDO:
+          return 'status-concluido'
+        default:
+          return ''
+      }
     }
   }
 }
@@ -226,5 +273,84 @@ export default {
 
 .offer-item button:hover {
   background-color: #c0392b;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.status-analise {
+  color: #f39c12;
+  background-color: #fef3c7;
+}
+
+.status-vigor {
+  color: #2ecc71;
+  background-color: #ecfdf5;
+}
+
+.status-cancelado {
+  color: #e74c3c;
+  background-color: #fef2f2;
+}
+
+.status-concluido {
+  color: #3498db;
+  background-color: #eff6ff;
+}
+
+.btn-cancelar {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-cancelar:hover {
+  background-color: #c0392b;
+}
+
+.btn-cancelar:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.nova-oferta-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-nova-oferta {
+  background-color: #ff8800;
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-nova-oferta:hover {
+  background-color: #e67300;
+}
+
+.btn-nova-oferta:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.aviso-oferta {
+  color: #777;
+  font-size: 0.9rem;
 }
 </style>

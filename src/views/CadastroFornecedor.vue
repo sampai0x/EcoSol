@@ -30,20 +30,34 @@
       </div>
 
       <div class="form-group">
+        <label for="telefone">Telefone:</label>
+        <input type="tel" id="telefone" v-model="form.telefone" required placeholder="Digite seu telefone" />
+      </div>
+
+      <div class="form-group">
+        <label for="endereco">Endereço:</label>
+        <input type="text" id="endereco" v-model="form.endereco" required placeholder="Digite seu endereço" />
+      </div>
+
+      <div class="form-group">
+        <label for="cidade">Cidade:</label>
+        <input type="text" id="cidade" v-model="form.cidade" required placeholder="Digite sua cidade" />
+      </div>
+
+      <div class="form-group">
+        <label for="estado">Estado:</label>
+        <input type="text" id="estado" v-model="form.estado" required placeholder="Digite seu estado" />
+      </div>
+
+      <div class="form-group">
         <label for="senha">Senha:</label>
         <input type="password" id="senha" v-model="form.senha" required placeholder="Digite sua senha" />
       </div>
 
       <div class="form-group">
         <label for="confirmarSenha">Confirmar Senha:</label>
-        <input type="password" id="confirmarSenha" v-model="form.confirmarSenha" required
-          placeholder="Digite sua senha" />
+        <input type="password" id="confirmarSenha" v-model="form.confirmarSenha" required placeholder="Digite sua senha novamente" />
         <span v-if="senhasDiferentes" class="erro">As senhas não coincidem</span>
-      </div>
-
-      <div class="form-group">
-        <label for="endereco">Endereço:</label>
-        <input type="text" id="endereco" v-model="form.endereco" required placeholder="Digite seu endereço" />
       </div>
 
       <button type="submit" :disabled="formInvalido">Cadastrar</button>
@@ -53,6 +67,9 @@
 
 <script>
 import { useRouter } from 'vue-router'
+import { fornecedorService } from '@/services/fornecedor'
+import { authService } from '@/services/auth'
+
 export default {
   name: 'CadastroFornecedor',
   data() {
@@ -63,8 +80,10 @@ export default {
         senha: '',
         confirmarSenha: '',
         endereco: '',
-        tipo: '',
-        cpfCnpj: ''
+        cpfCnpj: '',
+        telefone: '',
+        cidade: '',
+        estado: ''
       },
       mensagem: ''
     };
@@ -94,36 +113,38 @@ export default {
     }
   },
   methods: {
-    enviarFormulario() {
+    async enviarFormulario() {
       if (this.formInvalido) return;
 
-      const usuariosSalvos = JSON.parse(localStorage.getItem('usuarios') || '[]');
+      try {
+        // Cadastrar fornecedor
+        await fornecedorService.cadastrar({
+          nome: this.form.nome,
+          email: this.form.email,
+          senha: this.form.senha,
+          telefone: this.form.telefone,
+          endereco: this.form.endereco,
+          cidade: this.form.cidade,
+          estado: this.form.estado,
+          cpfCnpj: this.form.cpfCnpj,
+        });
 
-      const jaExiste = usuariosSalvos.some(u => u.email === this.form.email);
-      if (jaExiste) {
-        alert('Este e-mail já está cadastrado.');
-        return;
+        // Fazer login após cadastro
+        await authService.loginFornecedor(
+          this.form.email,
+          this.form.senha
+        );
+
+        this.$router.push('/DashboardFornecedor');
+      } catch (erro) {
+        if (erro.response?.data?.message) {
+          alert(erro.response.data.message);
+        } else {
+          alert('Ocorreu um erro ao realizar o cadastro. Tente novamente.');
+        }
+        console.error('Erro:', erro);
       }
-
-      const novoUsuario = {
-        nome: this.form.nome,
-        email: this.form.email,
-        senha: this.form.senha,
-        tipo: 'Fornecedor',
-        cpfCnpj: this.form.cpfCnpj,
-        endereco: this.form.endereco
-      };
-
-      usuariosSalvos.push(novoUsuario);
-      localStorage.setItem('usuarios', JSON.stringify(usuariosSalvos));
-
-
-      localStorage.setItem('usuarioLogado', JSON.stringify(novoUsuario));
-
-      this.$router.push('/DashboardFornecedor');
     }
-
-
   }
 };
 </script>
