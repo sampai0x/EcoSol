@@ -96,7 +96,14 @@
 </template>
 
 <script>
+import { authService } from '@/services/auth'
+import { homeService } from '@/services/home'
+
 export default {
+  name: 'Home',
+  components: {
+    // BackendStatus
+  },
   data() {
     return {
       navbarVisible: false,
@@ -104,6 +111,18 @@ export default {
       senha: '',
       isLoggedIn: false,
       usuario: null,
+      loginLoading: false,
+      logoutLoading: false,
+      loginError: '',
+      checkingAuth: false,
+      redirecting: false, // Flag para evitar múltiplos redirecionamentos
+      // Dados mock para desenvolvimento
+      stats: {
+        totalClientes: 150,
+        totalFornecedores: 45,
+        energiaTransacionada: 25000,
+        valorMovimentado: 125000.50
+      },
       imagens: [
         '/src/img/solar1.jpg',
         '/src/img/solar2.jpg',
@@ -120,38 +139,99 @@ export default {
       this.navbarVisible = true;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    login() {
-      const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
-
-      const usuarioValido = usuarios.find(usuario =>
-        usuario.email === this.email
-      );
-
-      console.log("Usuario válido encontrado?", usuarioValido);
-
-      if (usuarioValido) {
-        localStorage.setItem('usuarioLogado', JSON.stringify(usuarioValido));
+    async login() {
+      this.loginLoading = true;
+      this.loginError = '';
+      
+      try {
+        console.log('Tentando fazer login com:', this.email);
+        const response = await authService.login(this.email, this.senha);
+        console.log('Resposta do login:', response);
+        
+        // Atualiza o estado local imediatamente
         this.isLoggedIn = true;
-        this.usuario = usuarioValido;
-
-        this.goToDashboard();
-      } else {
-        alert('E-mail ou senha incorretos');
+        this.usuario = response;
+        
+        // Limpar campos de login
+        this.email = '';
+        this.senha = '';
+        this.navbarVisible = false;
+        
+        console.log('Login bem-sucedido, redirecionando...');
+        
+        // Redirecionar imediatamente
+        this.redirectToDashboard();
+        
+      } catch (error) {
+        console.error('Erro no login:', error);
+        this.loginError = error.message || 'Erro ao fazer login';
+      } finally {
+        this.loginLoading = false;
       }
     },
-    logout() {
-      this.isLoggedIn = false;
-      localStorage.removeItem('usuarioLogado');
-      this.$router.push('/');
-      location.reload();
+    async logout() {
+      this.logoutLoading = true;
+      try {
+        await authService.logout();
+        // Limpa o estado local
+        this.isLoggedIn = false;
+        this.usuario = null;
+        console.log('Logout realizado com sucesso');
+      } catch (error) {
+        console.error('Erro ao fazer logout:', error);
+        // Mesmo com erro, limpa os dados locais
+        this.isLoggedIn = false;
+        this.usuario = null;
+      } finally {
+        this.logoutLoading = false;
+      }
     },
     goToDashboard() {
-      if (this.usuario.tipo === 'Fornecedor') {
-        this.$router.push('/dashboardfornecedor');
-      } else if (this.usuario.tipo === 'Cliente') {
-        this.$router.push('/dashboardcliente');
-      } else if (this.usuario.tipo === 'Empresa') {
-        this.$router.push('/painelempresa');
+      // Evitar múltiplos redirecionamentos
+      if (this.redirecting) {
+        console.log('Redirecionamento já em andamento, ignorando...');
+        return;
+      }
+
+      console.log('Redirecionando usuário:', this.usuario);
+      
+      if (!this.usuario) {
+        console.error('Erro: Usuário não definido');
+        return;
+      }
+
+      
+      
+      this.redirectToDashboard();
+    },
+
+    redirectToDashboard() {
+      if (this.redirecting) return; // Evitar múltiplos redirecionamentos
+      
+      this.redirecting = true;
+      
+      const tipo = this.usuario.tipo;
+      console.log('Tipo de usuário:', tipo);
+      
+      try {
+        if (tipo === 'Fornecedor') {
+          console.log('Redirecionando para dashboard de fornecedor');
+          this.$router.push({ name: 'DashboardFornecedor' });
+        } else if (tipo === 'Cliente') {
+          console.log('Redirecionando para dashboard de cliente');
+          this.$router.push({ name: 'DashboardCliente' });
+        } else if (tipo === 'Empresa' || tipo === 'Admin') {
+          console.log('Redirecionando para painel da empresa');
+          this.$router.push({ name: 'PainelEmpresa' });
+        } else {
+          console.error('Tipo de usuário não reconhecido:', tipo);
+          alert('Erro: Tipo de usuário não reconhecido');
+        }
+      } finally {
+        // Reset flag após um tempo
+        setTimeout(() => {
+          this.redirecting = false;
+        }, 1000);
       }
     },
     irPara(destino) {
@@ -159,15 +239,71 @@ export default {
     },
     proximaImagem() {
       this.imagemAtual = (this.imagemAtual + 1) % this.imagens.length;
+    },
+    formatNumber(value) {
+      return new Intl.NumberFormat('pt-BR').format(value);
+    },
+    formatCurrency(value) {
+      return new Intl.NumberFormat('pt-BR', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      }).format(value);
+    },
+    carregarStats() {
+      homeService.getStats().then(response => {
+        this.stats = response;
+        console.log('✅ Estatísticas carregadas do backend:', response);
+      }).catch(error => {
+        console.error('Erro ao carregar estatísticas:', error);
+        // Manter dados mock como fallback
+        this.stats = {
+          totalClientes: 150,
+          totalFornecedores: 45,
+          energiaTransacionada: 25000,
+          valorMovimentado: 125000.50
+        };
+      });
+    },
+    // Verifica autenticação no backend sem bloquear a UI
+    async checkAuthStatus() {
+      if (this.checkingAuth) return; // Evita múltiplas verificações simultâneas
+      
+      this.checkingAuth = true;
+      try {
+        console.log('🔍 Verificando status de autenticação...');
+        const user = await authService.getCurrentUser();
+        
+        if (user) {
+          console.log('✅ Usuário autenticado:', user);
+          this.isLoggedIn = true;
+          this.usuario = user;
+          return user; // Retorna o usuário para uso em outras funções
+        } else {
+          console.log('❌ Usuário não autenticado');
+          this.isLoggedIn = false;
+          this.usuario = null;
+          return null;
+        }
+      } catch (error) {
+        console.error('❌ Erro na verificação de autenticação:', error);
+        this.isLoggedIn = false;
+        this.usuario = null;
+        return null;
+      } finally {
+        this.checkingAuth = false;
+      }
     }
   },
-  mounted() {
+  async mounted() {
+    console.log('🏠 Home.vue montado');
+    
     setInterval(this.proximaImagem, 5000);
-    const usuarioLogado = localStorage.getItem('usuarioLogado');
-    if (usuarioLogado) {
-      this.isLoggedIn = true;
-      this.usuario = JSON.parse(usuarioLogado);
-    }
+    
+    // Carregar estatísticas
+    this.carregarStats();
+    
+    // Verificar autenticação no backend (sem bloquear a UI)
+    this.checkAuthStatus();
   }
 };
 </script>
