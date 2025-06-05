@@ -61,6 +61,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { clienteService } from '@/services/cliente'
+import { authService } from '@/services/auth'
 
 const router = useRouter()
 
@@ -73,7 +75,10 @@ const form = ref({
   cpfCnpj: ''
 })
 
-const mensagem = ref('')
+const comprovante = ref(null)
+const loading = ref(false)
+const erro = ref('')
+const sucesso = ref('')
 
 const emailInvalido = computed(() => {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -91,71 +96,94 @@ const cpfCnpjInvalido = computed(() => {
 })
 
 const formInvalido = computed(() => {
-  return emailInvalido.value || senhasDiferentes.value || cpfCnpjInvalido.value
+  return emailInvalido.value || senhasDiferentes.value || cpfCnpjInvalido.value || !comprovante.value
 })
-
-const comprovante = ref(null)
 
 function handleFileUpload(event) {
   const file = event.target.files[0]
   if (file) {
-    const reader = new FileReader()
-    reader.onload = function (e) {
-      comprovante.value = {
-        nome: file.name,
-        conteudo: e.target.result
-      }
+    // Validar tamanho do arquivo (5MB)
+    const maxSize = 5 * 1024 * 1024 // 5MB
+    if (file.size > maxSize) {
+      erro.value = 'Arquivo excede o tamanho máximo permitido (5MB)'
+      return
     }
-    reader.readAsDataURL(file)
+
+    // Validar extensão
+    const extensoesPermitidas = ['.pdf', '.jpg', '.jpeg', '.png']
+    const extensao = '.' + file.name.split('.').pop().toLowerCase()
+    if (!extensoesPermitidas.includes(extensao)) {
+      erro.value = 'Extensão de arquivo não permitida. Use PDF, JPG, JPEG ou PNG'
+      return
+    }
+
+    comprovante.value = file
+    erro.value = ''
   }
 }
-
 
 function goTohome() {
   router.push('/')
 }
 
-function enviarFormulario() {
-  if (formInvalido.value) return
+async function enviarFormulario() {
+  if (formInvalido.value || loading.value) return
 
-  const usuariosSalvos = JSON.parse(localStorage.getItem('usuarios') || '[]')
+  loading.value = true
+  erro.value = ''
+  sucesso.value = ''
 
-  const jaExiste = usuariosSalvos.some(u => u.email === form.value.email)
-  if (jaExiste) {
-    alert('Este e-mail já está cadastrado.')
-    return
+  try {
+    const dadosCliente = {
+      nome: form.value.nome,
+      email: form.value.email,
+      senha: form.value.senha,
+      cpfCnpj: form.value.cpfCnpj,
+      endereco: form.value.endereco
+    }
+
+    console.log('Enviando dados do cliente:', dadosCliente)
+
+    // Cadastrar cliente
+    await clienteService.cadastrar(dadosCliente)
+    
+    sucesso.value = 'Cliente cadastrado com sucesso! Fazendo login...'
+    
+    // Fazer login automático após cadastro
+    await authService.loginCliente(form.value.email, form.value.senha)
+    
+    // Upload do comprovante após login (se necessário)
+    if (comprovante.value) {
+      try {
+        await clienteService.uploadComprovante(comprovante.value)
+      } catch (comprovanteError) {
+        console.warn('Erro ao fazer upload do comprovante:', comprovanteError)
+        // Não bloquear o fluxo se o upload do comprovante falhar
+      }
+    }
+    
+    sucesso.value = 'Cliente cadastrado com sucesso! Redirecionando...'
+    
+    // Aguardar um pouco para mostrar a mensagem de sucesso
+    setTimeout(() => {
+      router.push('/dashboardcliente')
+    }, 2000)
+
+  } catch (error) {
+    console.error('Erro completo:', error)
+    console.error('Response data:', error.response?.data)
+    console.error('Response status:', error.response?.status)
+    
+    erro.value = error.response?.data?.message || 
+                 error.response?.data?.title || 
+                 error.message || 
+                 'Erro ao cadastrar cliente. Tente novamente.'
+  } finally {
+    loading.value = false
   }
-
-  const novoEndereco = {
-    id: Date.now().toString(),
-    texto: form.value.endereco,
-    validado: false,
-    emailUsuario: form.value.email,
-    comprovante: comprovante.value || null
-  }
-
-  const novoUsuario = {
-    nome: form.value.nome,
-    email: form.value.email,
-    senha: form.value.senha,
-    tipo: 'Cliente',
-    cpfCnpj: form.value.cpfCnpj,
-    enderecos: [novoEndereco]
-  }
-
-  usuariosSalvos.push(novoUsuario)
-  localStorage.setItem('usuarios', JSON.stringify(usuariosSalvos))
-  localStorage.setItem('usuarioLogado', JSON.stringify(novoUsuario))
-
-  const enderecoPrimario = JSON.parse(localStorage.getItem('enderecos') || '[]')
-  enderecoPrimario.push(novoEndereco)
-  localStorage.setItem('enderecos', JSON.stringify(enderecoPrimario))
-
-  router.push('/DashboardCliente')
 }
-
-
 </script>
+
 
 <style scoped>
 /* seu CSS permanece igual */
