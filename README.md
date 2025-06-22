@@ -31,7 +31,7 @@
 ### Pré-requisitos
 - Node.js (v16+)
 - .NET SDK 6.0+
-- Banco de dados SQL Server (ou modificar a connection string)
+- Banco de dados PostgreSQL (ou modificar a connection string)
 
 ### Clonar o repositório
 ```bash
