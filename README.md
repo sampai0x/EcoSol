@@ -36,3 +36,36 @@
 ### Clonar o repositório
 ```bash
 git clone https://github.com/seu-usuario/EcoSol.git
+
+
+# 🌱 EcoSol - Front-end
+
+Interface web do projeto **EcoSol**, desenvolvida com [Vue 3](https://vuejs.org/) e [Vite](https://vitejs.dev/), com foco em uma experiência leve e moderna.
+
+## 🧪 Tecnologias
+
+- Vue 3
+- Vite
+- Vue Router
+- Axios
+- JavaScript moderno (ES6+)
+
+## 🚀 Como executar
+
+### Pré-requisitos
+- Node.js (versão 16 ou superior)
+- npm ou yarn
+
+### Passos
+```bash
+# Clonar o repositório
+git clone https://github.com/seu-usuario/EcoSol-front-end.git
+
+# Acessar a pasta
+cd EcoSol-front-end
+
+# Instalar as dependências
+npm install
+
+# Rodar o servidor de desenvolvimento
+npm run dev
