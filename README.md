@@ -59,7 +59,7 @@ Interface web do projeto **EcoSol**, desenvolvida com [Vue 3](https://vuejs.org/
 ### Passos
 ```bash
 # Clonar o repositório
-git clone https://github.com/seu-usuario/EcoSol-front-end.git
+git clone https://github.com/seu-usuario/EcoSol-Frontend.git
 
 # Acessar a pasta
 cd EcoSol-front-end
@@ -93,7 +93,7 @@ API RESTful para o projeto **EcoSol**, construída com .NET 6, arquitetura em ca
 ### Passos
 ```bash
 # Clonar o repositório
-git clone https://github.com/seu-usuario/EcoSol-main.git
+git clone https://github.com/seu-usuario/EcoSol-Backend.git
 
 # Acessar o diretório da API
 cd EcoSol-main/ECOSOL.API
