@@ -69,3 +69,41 @@ npm install
 
 # Rodar o servidor de desenvolvimento
 npm run dev
+```
+
+# 🌿 EcoSol - Back-end (.NET API)
+
+API RESTful para o projeto **EcoSol**, construída com .NET 6, arquitetura em camadas e Entity Framework Core para persistência de dados.
+
+## ⚙️ Tecnologias
+
+- ASP.NET Core 6
+- Entity Framework Core
+- SQL Server
+- DTOs e AutoMapper
+- Migrations com EF
+- Injeção de Dependência
+
+## 🏁 Como executar
+
+### Pré-requisitos
+- [.NET SDK 6.0+](https://dotnet.microsoft.com/)
+- SQL Server local ou em nuvem
+
+### Passos
+```bash
+# Clonar o repositório
+git clone https://github.com/seu-usuario/EcoSol-main.git
+
+# Acessar o diretório da API
+cd EcoSol-main/ECOSOL.API
+
+# Restaurar os pacotes
+dotnet restore
+
+# Aplicar migrations e criar o banco
+dotnet ef database update
+
+# Rodar a aplicação
+dotnet run
+
