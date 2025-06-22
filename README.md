@@ -106,4 +106,7 @@ dotnet ef database update
 
 # Rodar a aplicação
 dotnet run
+```
 
+## 📄 Licença
+Distribuído sob a licença MIT. Veja o arquivo [LICENSE](./LICENSE) para mais detalhes.
